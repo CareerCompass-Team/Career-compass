@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  --radius-DEFAULT: var(--radius);
+}
+
+/* ─── Dark theme (default) ─── */
+:root {
+  color-scheme: dark;
+
+  --bg-page:     #080e1f;
+  --bg-sidebar:  #06091a;
+  --bg-card:     #0e1629;
+  --bg-muted:    #131d35;
+  --bg-secondary:#1a2547;
+
+  --text-1: #e8eaf6;
+  --text-2: #c4cef0;
+  --text-3: #8394c0;
+  --text-4: #6b7db3;
+  --text-5: #4f5f8a;
+  --text-6: #2d3a57;
+
+  --border-1: rgba(99,120,210,0.18);
+  --border-2: rgba(99,120,210,0.12);
+  --border-3: rgba(99,120,210,0.07);
+
+  --accent:           #7c3aed;
+  --accent-dark:      #5b21b6;
+  --accent-text:      #a78bfa;
+  --accent-bg:        rgba(124,58,237,0.15);
+  --accent-bg-subtle: rgba(124,58,237,0.1);
+  --accent-bg-faint:  rgba(124,58,237,0.06);
+
+  --surface-hover:      rgba(255,255,255,0.04);
+  --surface-faint:      rgba(255,255,255,0.03);
+  --surface-very-faint: rgba(255,255,255,0.015);
+  --overlay-faint:      rgba(8,14,31,0.8);
+
+  --sidebar-border: rgba(99,120,210,0.12);
+  --input-bg: #0e1629;
+
+  /* semantic (Tailwind compat) */
+  --background: var(--bg-page);
+  --foreground: var(--text-1);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-1);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--bg-secondary);
+  --secondary-foreground: var(--accent-text);
+  --muted: var(--bg-muted);
+  --muted-foreground: var(--text-4);
+  --border: var(--border-1);
+  --ring: var(--accent);
+  --radius: 8px;
+}
+
+/* ─── Light theme ─── */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-page:     #f6f8ff;
+  --bg-sidebar:  #f0f3ff;
+  --bg-card:     #ffffff;
+  --bg-muted:    #eef1ff;
+  --bg-secondary:#e5eaff;
+
+  --text-1: #0d1340;
+  --text-2: #1e2a5e;
+  --text-3: #374778;
+  --text-4: #5a6a9a;
+  --text-5: #7a8ab0;
+  --text-6: #aab5d0;
+
+  --border-1: rgba(59,73,120,0.18);
+  --border-2: rgba(59,73,120,0.12);
+  --border-3: rgba(59,73,120,0.07);
+
+  --accent:           #6d28d9;
+  --accent-dark:      #5b21b6;
+  --accent-text:      #6d28d9;
+  --accent-bg:        rgba(109,40,217,0.1);
+  --accent-bg-subtle: rgba(109,40,217,0.07);
+  --accent-bg-faint:  rgba(109,40,217,0.04);
+
+  --surface-hover:      rgba(0,0,0,0.03);
+  --surface-faint:      rgba(0,0,0,0.02);
+  --surface-very-faint: rgba(0,0,0,0.01);
+  --overlay-faint:      rgba(6,9,26,0.7);
+
+  --sidebar-border: rgba(59,73,120,0.14);
+  --input-bg: #ffffff;
+
+  --background: var(--bg-page);
+  --foreground: var(--text-1);
+  --card: var(--bg-card);
+  --card-foreground: var(--text-1);
+  --primary: var(--accent);
+  --secondary: var(--bg-secondary);
+  --muted: var(--bg-muted);
+  --muted-foreground: var(--text-4);
+  --border: var(--border-1);
+}
+
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+html, body, #root {
+  height: 100%;
+  background-color: var(--bg-page);
+  color: var(--text-1);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display { font-family: 'DM Sans', sans-serif; }
+.font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn { animation: fadeIn 0.25s ease forwards; }
