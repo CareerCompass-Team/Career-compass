@@ -50,7 +50,7 @@ export default function Footer() {
               </div>
             </div>
 
-            <p className="text-xs leading-relaxed mb-5" style={{ color: 'var(--text-5)' }}>
+            <p className="text-xs leading-relaxed mb-5" style={{ color: 'var(--text-3)' }}>
               AI-powered career platform for Kenyan students, graduates, and early-career professionals. Scam-free. Free to start.
             </p>
 
@@ -64,7 +64,7 @@ export default function Footer() {
                   style={{
                     background: 'var(--bg-card)',
                     borderColor: 'var(--border-1)',
-                    color: 'var(--text-4)',
+                    color: 'var(--text-3)',
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)'
@@ -72,7 +72,7 @@ export default function Footer() {
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.borderColor = 'var(--border-1)'
-                    e.currentTarget.style.color = 'var(--text-4)'
+                    e.currentTarget.style.color = 'var(--text-3)'
                   }}
                 >
                   <Icon size={14} />
@@ -84,7 +84,7 @@ export default function Footer() {
           {/* Link columns */}
           {Object.entries(FOOTER_LINKS).map(([title, links]) => (
             <div key={title}>
-              <h4 className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'var(--text-3)' }}>
+              <h4 className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: 'var(--text-2)' }}>
                 {title}
               </h4>
               <ul className="space-y-2.5">
@@ -93,7 +93,7 @@ export default function Footer() {
                     <a
                       href={link.href}
                       className="text-xs transition-colors hover:text-purple-300 flex items-center gap-1 group"
-                      style={{ color: 'var(--text-5)' }}
+                      style={{ color: 'var(--text-3)' }}
                     >
                       {link.label}
                       <ArrowUpRight
@@ -120,7 +120,7 @@ export default function Footer() {
             <div className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>
               Ready to find your next role?
             </div>
-            <div className="text-xs mt-0.5" style={{ color: 'var(--text-4)' }}>
+            <div className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>
               Join 47,000+ Kenyan job seekers already on CareerCompass.
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div
           className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t text-xs"
-          style={{ borderColor: 'var(--border-2)', color: 'var(--text-5)' }}
+          style={{ borderColor: 'var(--border-2)', color: 'var(--text-4)' }}
         >
           <div className="flex items-center gap-2">
             <ShieldCheck size={13} className="text-emerald-500" />

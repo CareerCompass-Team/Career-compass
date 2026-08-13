@@ -45,7 +45,7 @@ export default function HowItWorks() {
         >
           From first search to signed offer.
         </h2>
-        <p className="text-sm max-w-sm mx-auto" style={{ color: 'var(--text-4)' }}>
+        <p className="text-sm max-w-sm mx-auto" style={{ color: 'var(--text-3)' }}>
           Three steps. One platform. Zero spreadsheets.
         </p>
       </div>
@@ -82,13 +82,13 @@ export default function HowItWorks() {
                     >
                       <Icon size={20} />
                     </div>
-                    <span className="font-mono text-[11px] font-medium px-2.5 py-0.5 rounded-full border" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
+                    <span className="font-mono text-[11px] font-medium px-2.5 py-0.5 rounded-full border" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-2)', color: 'var(--text-3)' }}>
                       STEP {n}
                     </span>
                   </div>
 
                   <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-1)' }}>{title}</h3>
-                  <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-4)' }}>{body}</p>
+                  <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-3)' }}>{body}</p>
                 </div>
 
                 {/* Subtle progress indicator */}

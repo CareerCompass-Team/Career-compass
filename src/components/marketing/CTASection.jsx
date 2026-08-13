@@ -48,7 +48,7 @@ export default function CTASection() {
           </span>
         </h2>
 
-        <p className="text-sm mb-8 max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--text-4)' }}>
+        <p className="text-sm mb-8 max-w-lg mx-auto leading-relaxed" style={{ color: 'var(--text-3)' }}>
           Join thousands of professionals across Nairobi and East Africa who found scam-free, well-matched opportunities with CareerCompass.
         </p>
 

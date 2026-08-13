@@ -111,7 +111,7 @@ export default function FeatureGrid() {
           Everything you need.{' '}
           <span className="gradient-text">Nothing you don't.</span>
         </h2>
-        <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--text-4)' }}>
+        <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--text-3)' }}>
           Built specifically for job seekers and recruiters across Kenya and Africa.
         </p>
       </div>
@@ -148,7 +148,7 @@ export default function FeatureGrid() {
                   </div>
 
                   <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-1)' }}>{title}</h3>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-4)' }}>{body}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-3)' }}>{body}</p>
                 </div>
 
                 {preview}

@@ -29,8 +29,8 @@ function StatItem({ icon: Icon, value, label, subtext }) {
         <div className="font-display text-xl font-bold tracking-tight gradient-text">
           {displayed}
         </div>
-        <div className="text-xs font-medium" style={{ color: 'var(--text-3)' }}>{label}</div>
-        {subtext && <div className="text-[10px]" style={{ color: 'var(--text-5)' }}>{subtext}</div>}
+        <div className="text-xs font-medium" style={{ color: 'var(--text-2)' }}>{label}</div>
+        {subtext && <div className="text-[11px]" style={{ color: 'var(--text-4)' }}>{subtext}</div>}
       </div>
     </div>
   )
@@ -68,13 +68,13 @@ function HeroInteractivePreview() {
           </div>
           <div>
             <div className="text-xs font-bold" style={{ color: 'var(--text-1)' }}>CareerCompass Studio</div>
-            <div className="text-[10px]" style={{ color: 'var(--text-5)' }}>Live Platform Preview</div>
+            <div className="text-[11px]" style={{ color: 'var(--text-4)' }}>Live Platform Preview</div>
           </div>
         </div>
 
         <span
-          className="text-[10px] px-2.5 py-1 rounded-full font-medium border"
-          style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-2)', color: 'var(--text-4)' }}
+          className="text-[11px] px-2.5 py-1 rounded-full font-medium border"
+          style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-2)', color: 'var(--text-3)' }}
         >
           Interactive Demo
         </span>
@@ -123,15 +123,15 @@ function HeroInteractivePreview() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-bold truncate" style={{ color: 'var(--text-1)' }}>{a.role}</div>
-                  <div className="text-[11px] flex items-center gap-1.5" style={{ color: 'var(--text-4)' }}>
+                  <div className="text-[11px] flex items-center gap-1.5" style={{ color: 'var(--text-3)' }}>
                     <span>{a.company}</span>
                     <span>·</span>
-                    <span className="text-[10px]" style={{ color: 'var(--text-5)' }}>{a.date}</span>
+                    <span className="text-[11px]" style={{ color: 'var(--text-4)' }}>{a.date}</span>
                   </div>
                 </div>
               </div>
               <span
-                className="text-[10px] px-2.5 py-1 rounded-full font-bold shrink-0 border"
+                className="text-[11px] px-2.5 py-1 rounded-full font-semibold shrink-0 border"
                 style={{ background: `${a.color}1f`, borderColor: `${a.color}40`, color: a.color }}
               >
                 {a.stage}
@@ -211,7 +211,7 @@ function HeroInteractivePreview() {
       )}
 
       {/* Floating Trust Badge */}
-      <div className="mt-4 pt-3 border-t flex items-center justify-between text-[11px]" style={{ borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
+      <div className="mt-4 pt-3 border-t flex items-center justify-between text-xs" style={{ borderColor: 'var(--border-2)', color: 'var(--text-3)' }}>
         <span className="flex items-center gap-1">
           <ShieldCheck size={14} className="text-emerald-400" />
           KRA & Registration Verified

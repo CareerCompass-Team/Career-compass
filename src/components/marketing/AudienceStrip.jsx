@@ -64,7 +64,7 @@ export default function AudienceStrip() {
           >
             Built for where you're starting from.
           </h2>
-          <p className="text-sm max-w-xl" style={{ color: 'var(--text-4)' }}>
+          <p className="text-sm max-w-xl" style={{ color: 'var(--text-3)' }}>
             Generic job boards treat a first internship search the same as a 10th senior role. We don't.
           </p>
         </div>
@@ -99,13 +99,13 @@ export default function AudienceStrip() {
                     {title}
                     {isSelected && <CheckCircle2 size={16} className="text-purple-400" />}
                   </h3>
-                  <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-4)' }}>
+                  <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-3)' }}>
                     {body}
                   </p>
 
                   <div
                     className="text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                    style={{ color: isSelected ? 'var(--accent-text)' : 'var(--text-5)' }}
+                    style={{ color: isSelected ? 'var(--accent-text)' : 'var(--text-4)' }}
                   >
                     View Sample Roles <ArrowRight size={13} />
                   </div>
@@ -158,7 +158,7 @@ export default function AudienceStrip() {
         className="py-8 overflow-hidden border-t border-b bg-tech-grid"
         style={{ borderColor: 'var(--border-1)', background: 'rgba(8,14,31,0.7)' }}
       >
-        <div className="text-center text-[11px] font-bold tracking-widest mb-4" style={{ color: 'var(--text-5)' }}>
+        <div className="text-center text-xs font-bold tracking-widest mb-4" style={{ color: 'var(--text-4)' }}>
           TRUSTED BY LEADING EMPLOYERS ACROSS AFRICA
         </div>
         <div className="relative overflow-hidden" style={{ maskImage: 'linear-gradient(90deg, transparent, black 15%, black 85%, transparent)' }}>
