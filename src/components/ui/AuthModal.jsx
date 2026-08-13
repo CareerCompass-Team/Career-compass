@@ -41,7 +41,6 @@ export default function AuthModal() {
       })
     }
 
-    // Redirect user to appropriate dashboard after auth
     if (role === 'recruiter') {
       navigate('/recruiter')
     } else {
@@ -51,23 +50,37 @@ export default function AuthModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-fadeIn"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn"
       style={{
-        background: 'rgba(8, 14, 31, 0.82)',
+        background: 'rgba(8, 14, 31, 0.85)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
       }}
+      onClick={closeAuthModal}
     >
+      {/*
+        Key fix: modal card uses flex-col with a max-h so it never overflows viewport.
+        Header is flex-shrink-0, form body is overflow-y-auto flex-1 so it scrolls internally.
+      */}
       <div
-        className="w-full max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all border animate-scaleIn relative"
-        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
+        className="w-full max-w-md rounded-2xl shadow-2xl border animate-scaleIn relative flex flex-col shrink-0 my-auto"
+        style={{
+          background: 'var(--bg-card)',
+          borderColor: 'var(--border-1)',
+          maxHeight: 'min(90vh, 680px)',
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="p-6 relative text-center" style={{ borderBottom: '1px solid var(--border-3)' }}>
+        {/* ── HEADER (fixed, never scrolls) ── */}
+        <div
+          className="p-6 relative text-center shrink-0"
+          style={{ borderBottom: '1px solid var(--border-3)' }}
+        >
           <button
             onClick={closeAuthModal}
             className="absolute right-4 top-4 p-1.5 rounded-full hover:opacity-80 transition-opacity"
             style={{ color: 'var(--text-4)' }}
+            aria-label="Close"
           >
             <X size={18} />
           </button>
@@ -108,8 +121,12 @@ export default function AuthModal() {
           </div>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        {/* ── FORM BODY (scrollable when content taller than available space) ── */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex-1 overflow-y-auto p-6 space-y-4"
+          style={{ overscrollBehavior: 'contain' }}
+        >
           {role === 'recruiter' && (
             <div className="p-3 rounded-xl flex items-start gap-2.5 text-xs" style={{ background: 'rgba(124, 58, 237, 0.08)', border: '1px solid rgba(124, 58, 237, 0.2)', color: 'var(--text-2)' }}>
               <ShieldCheck size={16} className="text-purple-500 shrink-0 mt-0.5" />
@@ -210,7 +227,9 @@ export default function AuthModal() {
             type="submit"
             className="w-full mt-2 py-3 rounded-xl font-medium text-sm text-white flex items-center justify-center gap-2 press-scale transition-opacity"
             style={{
-              background: role === 'recruiter' ? 'linear-gradient(135deg, #7c3aed, #6d28d9)' : 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
+              background: role === 'recruiter'
+                ? 'linear-gradient(135deg, #7c3aed, #6d28d9)'
+                : 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
             }}
           >
             {mode === 'login' ? 'Sign In' : 'Create Account'}

@@ -91,7 +91,7 @@ export default function ApplicationList({ applications, onCardClick }) {
         return (
           <Link
             key={app.id}
-            to={isSaved ? `/jobs/${app.jobId}` : `/applications/${app.id}`}
+            to={isSaved ? `/jobs/${app.jobId}` : app.status === 'Offer' ? `/applications/${app.id}/offer` : `/applications/${app.id}`}
             className="grid px-5 py-3.5 transition-colors items-center group"
             style={{
               gridTemplateColumns: COLUMNS,

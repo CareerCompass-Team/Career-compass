@@ -35,10 +35,15 @@ const candidateNavItems = [
 
 const recruiterNavItems = [
   {
-    section: 'RECRUITER PORTAL',
+    section: 'RECRUITER HQ',
     items: [
-      { path: '/recruiter', label: 'Overview & Candidates', icon: HomeIcon },
-      { path: '/jobs', label: 'View All Jobs', icon: SearchIcon },
+      { path: '/recruiter', label: 'Hiring Dashboard', icon: HomeIcon },
+    ],
+  },
+  {
+    section: 'TALENT & JOBS',
+    items: [
+      { path: '/jobs', label: 'All Job Listings', icon: SearchIcon },
     ],
   },
   {

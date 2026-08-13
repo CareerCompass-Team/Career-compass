@@ -2,22 +2,19 @@ import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   MapPin, Briefcase, Wallet, Clock, Heart, CheckCircle2,
-  ArrowLeft, ExternalLink, FileText, Globe, ShieldCheck, ArrowRight,
+  ArrowLeft, ExternalLink, Globe, ShieldCheck,
 } from 'lucide-react'
 import { useAppData } from '../context/AppDataContext'
 import CompanyAvatar from '../components/ui/CompanyAvatar'
 import ProgressBar from '../components/ui/ProgressBar'
-import Modal from '../components/ui/Modal'
+import ApplyModal from '../components/ui/ApplyModal'
 
 export default function JobDetails() {
   const { jobId } = useParams()
   const navigate = useNavigate()
-  const { jobs, applications, resumes, toggleSaveJob, applyToJob } = useAppData()
+  const { jobs, applications, toggleSaveJob } = useAppData()
 
   const [showApplyModal, setShowApplyModal] = useState(false)
-  const [selectedResumeId, setSelectedResumeId] = useState(
-    resumes.find(r => r.isDefault)?.id ?? resumes[0]?.id ?? null
-  )
 
   const job = jobs.find(j => j.id === jobId)
   const existingApplication = applications.find(a => a.jobId === jobId)
@@ -37,21 +34,10 @@ export default function JobDetails() {
 
   const handleApplyClick = () => {
     if (isExternal) {
-      // Open external link immediately — no modal needed
       window.open(job.applyUrl, '_blank', 'noopener,noreferrer')
     } else {
       setShowApplyModal(true)
     }
-  }
-
-  const handleConfirmApply = () => {
-    const resume = resumes.find(r => r.id === selectedResumeId)
-    const newAppId = applyToJob(job.id, {
-      resumeId: resume?.id ?? null,
-      resumeName: resume?.name ?? null,
-    })
-    setShowApplyModal(false)
-    navigate(`/applications/${newAppId}`)
   }
 
   return (
@@ -110,7 +96,7 @@ export default function JobDetails() {
 
         {/* ── Action buttons ── */}
         <div className="flex items-center gap-3 mt-5 pt-5" style={{ borderTop: '1px solid var(--border-3)' }}>
-          {existingApplication && !isExternal ? (
+          {existingApplication && existingApplication.status !== 'Saved' && !isExternal ? (
             <Link
               to={`/applications/${existingApplication.id}`}
               className="text-sm px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 press-scale"
@@ -127,7 +113,7 @@ export default function JobDetails() {
               {isExternal ? (
                 <><ExternalLink size={15} />Apply on {job.company}'s site</>
               ) : (
-                <>Apply Now</>
+                <>Apply Now (Submit Application)</>
               )}
             </button>
           )}
@@ -217,59 +203,13 @@ export default function JobDetails() {
       </div>
 
       {/* ── In-App Apply Modal (internal listings only) ── */}
-      {showApplyModal && !isExternal && (
-        <Modal title={`Apply to ${job.company}`} onClose={() => setShowApplyModal(false)}>
-          {/* Source confidence notice */}
-          <div
-            className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs border"
-            style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.2)', color: 'var(--text-3)' }}
-          >
-            <ShieldCheck size={14} className="text-emerald-400 mt-0.5 shrink-0" />
-            <span>
-              <strong style={{ color: '#34d399' }}>CareerCompass Verified Listing.</strong>{' '}
-              Your application stays within the platform and is delivered directly to the verified recruiter.
-            </span>
-          </div>
-
-          <p className="text-sm mb-4" style={{ color: 'var(--text-4)' }}>Choose which CV to submit with this application.</p>
-
-          <div className="flex flex-col gap-2 mb-6">
-            {resumes.length === 0 && (
-              <div className="flex items-center gap-2 p-3 rounded-lg text-xs border" style={{ borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
-                <FileText size={14} />
-                No CVs uploaded yet — you can still apply and attach one later from your Resumes page.
-              </div>
-            )}
-            {resumes.map(r => (
-              <label
-                key={r.id}
-                className="flex items-center gap-3 text-sm px-3 py-2.5 rounded-lg cursor-pointer transition-colors"
-                style={{
-                  background: selectedResumeId === r.id ? 'var(--accent-bg)' : 'var(--surface-hover)',
-                  border: selectedResumeId === r.id ? '1px solid var(--border-1)' : '1px solid transparent',
-                  color: 'var(--text-2)',
-                }}
-              >
-                <input
-                  type="radio"
-                  name="resume"
-                  checked={selectedResumeId === r.id}
-                  onChange={() => setSelectedResumeId(r.id)}
-                />
-                {r.name} {r.isDefault && <span className="text-xs" style={{ color: 'var(--text-5)' }}>(default)</span>}
-              </label>
-            ))}
-          </div>
-
-          <button
-            onClick={handleConfirmApply}
-            className="w-full text-sm px-5 py-3 rounded-xl font-medium press-scale flex items-center justify-center gap-2"
-            style={{ background: 'var(--accent)', color: 'white' }}
-          >
-            Submit Application <ArrowRight size={15} />
-          </button>
-        </Modal>
-      )}
+      <ApplyModal
+        isOpen={showApplyModal && !isExternal}
+        onClose={() => setShowApplyModal(false)}
+        job={job}
+        existingApp={existingApplication}
+        onSuccess={(newAppId) => navigate(`/applications/${newAppId}`)}
+      />
     </div>
   )
 }

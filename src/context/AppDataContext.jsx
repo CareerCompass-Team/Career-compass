@@ -3,8 +3,12 @@ import * as mock from '../data/mockData'
 import { fetchLiveJobs } from '../Services/jobApi'
 
 const AppDataContext = createContext(null)
-const STORAGE_KEY = 'careercompass-data-v2'
 const USER_KEY = 'careercompass-user-session'
+
+// Per-user data bucket keyed by email so different accounts never share state
+function dataKey(email) {
+  return `careercompass-data-v3-${(email || 'guest').toLowerCase()}`
+}
 
 function getInitialUser() {
   try {
@@ -16,7 +20,8 @@ function getInitialUser() {
   return {
     isLoggedIn: true,
     isNewUser: false,
-    role: 'candidate', // 'candidate' | 'recruiter'
+    tourDismissed: true,
+    role: 'candidate',
     name: mock.profile.name,
     email: mock.profile.email,
     companyName: 'TechCorp Africa',
@@ -26,13 +31,13 @@ function getInitialUser() {
   }
 }
 
-function loadInitialData() {
-  const defaults = {
+function mockDefaults() {
+  return {
     jobs: mock.jobs.map(j => ({
       ...j,
       isVerified: true,
       sourceTag: j.location?.includes('Remote') ? 'Global Remote' : 'Kenya Local',
-      source: 'internal',   // in-app posting — SmartApply uses in-app form
+      source: 'internal',
       applyUrl: null,
     })),
     applications: mock.applications || [],
@@ -40,22 +45,44 @@ function loadInitialData() {
     resumes: mock.resumes || [],
     profile: mock.profile || {},
   }
+}
+
+function emptyUserData() {
+  return {
+    jobs: mock.jobs.map(j => ({
+      ...j,
+      isVerified: true,
+      sourceTag: j.location?.includes('Remote') ? 'Global Remote' : 'Kenya Local',
+      source: 'internal',
+      applyUrl: null,
+      saved: false,
+    })),
+    applications: [],
+    interviews: [],
+    resumes: [],
+    profile: {},
+  }
+}
+
+function loadDataForUser(email) {
+  if (!email) return mockDefaults()
+  const isMockUser = email === mock.profile?.email
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(dataKey(email))
     if (raw) {
       const parsed = JSON.parse(raw)
       return {
-        jobs: Array.isArray(parsed.jobs) ? parsed.jobs : defaults.jobs,
-        applications: Array.isArray(parsed.applications) ? parsed.applications : defaults.applications,
-        interviews: Array.isArray(parsed.interviews) ? parsed.interviews : defaults.interviews,
-        resumes: Array.isArray(parsed.resumes) ? parsed.resumes : defaults.resumes,
-        profile: parsed.profile || defaults.profile,
+        jobs: Array.isArray(parsed.jobs) ? parsed.jobs : isMockUser ? mockDefaults().jobs : emptyUserData().jobs,
+        applications: Array.isArray(parsed.applications) ? parsed.applications : isMockUser ? mock.applications : [],
+        interviews: Array.isArray(parsed.interviews) ? parsed.interviews : isMockUser ? mock.interviews : [],
+        resumes: Array.isArray(parsed.resumes) ? parsed.resumes : isMockUser ? mock.resumes : [],
+        profile: parsed.profile || (isMockUser ? mock.profile : {}),
       }
     }
   } catch {
     // fall through
   }
-  return defaults
+  return isMockUser ? mockDefaults() : emptyUserData()
 }
 
 function today() {
@@ -67,20 +94,22 @@ function uid(prefix) {
 }
 
 export function AppDataProvider({ children }) {
-  const [data, setData] = useState(loadInitialData)
-  const [user, setUser] = useState(getInitialUser)
+  const initialUser = getInitialUser()
+  const [data, setData] = useState(() => loadDataForUser(initialUser.email))
+  const [user, setUser] = useState(initialUser)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
 
-  // Persist data changes
+  // Persist data to the CURRENT USER's isolated bucket on every change
   useEffect(() => {
+    if (!user?.email) return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+      localStorage.setItem(dataKey(user.email), JSON.stringify(data))
     } catch {
       // non-fatal
     }
-  }, [data])
+  }, [data, user?.email])
 
   // Load live external jobs from API on mount
   useEffect(() => {
@@ -95,6 +124,7 @@ export function AppDataProvider({ children }) {
     })
   }, [])
 
+  // Persist user session
   useEffect(() => {
     try {
       localStorage.setItem(USER_KEY, JSON.stringify(user))
@@ -125,18 +155,22 @@ export function AppDataProvider({ children }) {
     const nameFromEmail = email.split('@')[0]
     const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1)
     const initials = formattedName.substring(0, 2).toUpperCase()
-
-    setUser({
+    const isMockUser = email === mock.profile?.email
+    const restoredUser = {
       isLoggedIn: true,
       isNewUser: false,
+      tourDismissed: true,
       role,
-      name: role === 'candidate' ? (email === mock.profile.email ? mock.profile.name : formattedName) : `${formattedName} (Recruiter)`,
+      name: isMockUser ? mock.profile.name : (role === 'recruiter' ? `${formattedName} (Recruiter)` : formattedName),
       email,
       companyName: role === 'recruiter' ? `${formattedName} Talent` : '',
       isVerifiedEmployer: role === 'recruiter',
       avatar: initials,
       experienceLevel: role === 'recruiter' ? 'Hiring Manager' : 'Job Seeker',
-    })
+    }
+    setUser(restoredUser)
+    // Load that user's own data bucket
+    setData(loadDataForUser(email))
     setAuthModalOpen(false)
   }
 
@@ -148,17 +182,21 @@ export function AppDataProvider({ children }) {
       .substring(0, 2)
       .toUpperCase()
 
-    setUser({
+    const newUser = {
       isLoggedIn: true,
       isNewUser: true,
+      tourDismissed: false,
       role,
       name,
       email,
       companyName: role === 'recruiter' ? (companyName || `${name}'s Organization`) : '',
-      isVerifiedEmployer: false, // Must undergo anti-scam check
+      isVerifiedEmployer: false,
       avatar: initials || 'CC',
       experienceLevel: role === 'recruiter' ? 'Hiring Manager' : experienceLevel,
-    })
+    }
+    setUser(newUser)
+    // Brand-new account → start with a clean slate
+    setData(emptyUserData())
     setAuthModalOpen(false)
   }
 
@@ -178,6 +216,10 @@ export function AppDataProvider({ children }) {
 
   const dismissNewUserNotice = () => {
     setUser(u => ({ ...u, isNewUser: false }))
+  }
+
+  const dismissTour = () => {
+    setUser(u => ({ ...u, isNewUser: false, tourDismissed: true }))
   }
 
   const verifyEmployer = ({ companyRegistration, workEmail, website }) => {
@@ -452,9 +494,20 @@ export function AppDataProvider({ children }) {
       applications: 0,
       size: '310 KB',
       format: 'PDF',
+      content: '',
       ...resumeData,
     }
     setData(d => ({ ...d, resumes: [newResume, ...d.resumes] }))
+    return newResume.id
+  }
+
+  const updateResumeContent = (resumeId, content) => {
+    setData(d => ({
+      ...d,
+      resumes: d.resumes.map(r =>
+        r.id === resumeId ? { ...r, content, updatedDate: today() } : r
+      ),
+    }))
   }
 
   const setDefaultResume = resumeId => {
@@ -487,6 +540,7 @@ export function AppDataProvider({ children }) {
     signup,
     logout,
     dismissNewUserNotice,
+    dismissTour,
     verifyEmployer,
     postVerifiedJob,
     toggleSaveJob,
@@ -504,6 +558,7 @@ export function AppDataProvider({ children }) {
     addResume,
     setDefaultResume,
     deleteResume,
+    updateResumeContent,
     updateProfile,
   }
 

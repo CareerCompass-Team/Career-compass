@@ -29,10 +29,14 @@ export default function VerificationModal({ isOpen, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto animate-fadeIn"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl transition-all border p-6 relative"
+        className="w-full max-w-lg max-h-[85vh] my-auto rounded-2xl overflow-hidden shadow-2xl transition-all border p-6 relative shrink-0 overflow-y-auto flex flex-col"
         style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
+        onClick={e => e.stopPropagation()}
       >
         <button
           onClick={onClose}

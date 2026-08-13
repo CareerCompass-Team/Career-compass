@@ -151,7 +151,7 @@ export default function ApplicationKanban({ applications, onCardClick, onAdvance
                 return (
                   <Link
                     key={app.id}
-                    to={isSaved ? `/jobs/${app.jobId}` : `/applications/${app.id}`}
+                    to={isSaved ? `/jobs/${app.jobId}` : isOffer ? `/applications/${app.id}/offer` : `/applications/${app.id}`}
                     className="rounded-xl p-3.5 block transition-all duration-150 hover-lift border group"
                     style={{ background: 'var(--bg-page)', borderColor: 'var(--border-1)' }}
                     onMouseEnter={(e) => (e.currentTarget.style.borderColor = colColor)}

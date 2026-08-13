@@ -1,5 +1,6 @@
 import Sidebar from './Sidebar'
 import AICopilot from '../ui/AICopilot'
+import OnboardingTour from '../ui/OnboardingTour'
 import { useAppData } from '../../context/AppDataContext'
 import { Sparkles, X } from 'lucide-react'
 
@@ -32,6 +33,9 @@ export default function AppShell({ children }) {
 
       {/* Global AI Assistant */}
       <AICopilot />
+
+      {/* Guided Tour for New Users */}
+      <OnboardingTour />
     </div>
   )
 }

@@ -121,19 +121,12 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => handleAcceptOffer(activeOffers[0].id)}
-                className="text-xs px-5 py-2.5 rounded-xl font-bold text-white press-scale flex items-center gap-1.5 shadow"
-                style={{ background: '#10b981' }}
-              >
-                <CheckCircle2 size={15} /> Accept Offer Now
-              </button>
               <Link
-                to={`/applications/${activeOffers[0].id}`}
-                className="text-xs px-4 py-2.5 rounded-xl font-medium press-scale border"
-                style={{ borderColor: 'rgba(16, 185, 129, 0.4)', color: 'var(--text-1)', background: 'var(--bg-card)' }}
+                to={`/applications/${activeOffers[0].id}/offer`}
+                className="text-xs px-5 py-2.5 rounded-xl font-bold text-white press-scale flex items-center gap-1.5 shadow"
+                style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
               >
-                View Offer Details
+                <CheckCircle2 size={15} /> Review & Sign Offer Contract
               </Link>
             </div>
           </div>
@@ -246,13 +239,13 @@ export default function Dashboard() {
                     {/* Quick action buttons */}
                     <div className="flex items-center gap-2">
                       {app.status === 'Offer' ? (
-                        <button
-                          onClick={() => handleAcceptOffer(app.id)}
+                        <Link
+                          to={`/applications/${app.id}/offer`}
                           className="text-xs px-3.5 py-1.5 rounded-lg font-bold text-white press-scale flex items-center gap-1"
-                          style={{ background: '#10b981' }}
+                          style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
                         >
-                          <PartyPopper size={13} /> Accept Offer
-                        </button>
+                          <PartyPopper size={13} /> View Offer & Sign
+                        </Link>
                       ) : nextStatus ? (
                         <button
                           onClick={() => updateApplicationStatus(app.id, nextStatus, `Advanced to ${nextStatus}`)}

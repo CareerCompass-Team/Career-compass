@@ -9,6 +9,7 @@ import Jobs from './pages/Jobs'
 import JobDetails from './pages/JobDetails'
 import Applications from './pages/Applications'
 import ApplicationDetails from './pages/ApplicationDetails'
+import OfferDetails from './pages/OfferDetails'
 import Interviews from './pages/Interviews'
 import InterviewDetails from './pages/InterviewDetails'
 import InterviewPractice from './pages/InterviewPractice'
@@ -57,6 +58,7 @@ export default function App() {
               <Route path="/jobs/:jobId" element={<AppShell><JobDetails /></AppShell>} />
               <Route path="/applications" element={<AppShell><Applications /></AppShell>} />
               <Route path="/applications/:id" element={<AppShell><ApplicationDetails /></AppShell>} />
+              <Route path="/applications/:id/offer" element={<AppShell><OfferDetails /></AppShell>} />
               <Route path="/interviews" element={<AppShell><Interviews /></AppShell>} />
               <Route path="/interviews/:id" element={<AppShell><InterviewDetails /></AppShell>} />
               <Route path="/interviews/:id/practice" element={<AppShell><InterviewPractice /></AppShell>} />
