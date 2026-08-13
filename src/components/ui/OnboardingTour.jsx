@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Sparkles, ArrowRight, ArrowLeft, X, Briefcase, FileText, CheckCircle2, ShieldCheck, Video, BookOpen, Compass, ExternalLink } from 'lucide-react'
 import { useAppData } from '../../context/AppDataContext'
@@ -152,13 +153,13 @@ export default function OnboardingTour() {
     }
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[300] pointer-events-none flex items-end sm:items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[9999] pointer-events-none flex items-end sm:items-center justify-center p-4 sm:p-6"
     >
       {/* Dimmed backdrop with pointer events allowed only on backdrop click */}
       <div
-        className="fixed inset-0 bg-black/55 backdrop-blur-[3px] pointer-events-auto transition-all duration-300"
+        className="fixed inset-0 bg-black/60 backdrop-blur-[3px] pointer-events-auto transition-all duration-300"
         onClick={() => dismissTour()}
       />
 
@@ -251,6 +252,7 @@ export default function OnboardingTour() {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

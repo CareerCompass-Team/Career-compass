@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { X, UserCheck, Briefcase, ShieldCheck, ArrowRight, Lock, Mail, User, Building } from 'lucide-react'
 import { useAppData } from '../../context/AppDataContext'
@@ -48,9 +49,9 @@ export default function AuthModal() {
     }
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto animate-fadeIn"
       style={{
         background: 'rgba(8, 14, 31, 0.85)',
         backdropFilter: 'blur(12px)',
@@ -58,20 +59,17 @@ export default function AuthModal() {
       }}
       onClick={closeAuthModal}
     >
-      {/*
-        Key fix: modal card uses flex-col with a max-h so it never overflows viewport.
-        Header is flex-shrink-0, form body is overflow-y-auto flex-1 so it scrolls internally.
-      */}
       <div
         className="w-full max-w-md rounded-2xl shadow-2xl border animate-scaleIn relative flex flex-col shrink-0 my-auto"
         style={{
           background: 'var(--bg-card)',
           borderColor: 'var(--border-1)',
           maxHeight: 'min(90vh, 680px)',
+          color: 'var(--text-1)',
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* ── HEADER (fixed, never scrolls) ── */}
+        {/* Header */}
         <div
           className="p-6 relative text-center shrink-0"
           style={{ borderBottom: '1px solid var(--border-3)' }}
@@ -121,7 +119,7 @@ export default function AuthModal() {
           </div>
         </div>
 
-        {/* ── FORM BODY (scrollable when content taller than available space) ── */}
+        {/* Form Body */}
         <form
           onSubmit={handleSubmit}
           className="flex-1 overflow-y-auto p-6 space-y-4"
@@ -265,6 +263,7 @@ export default function AuthModal() {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
