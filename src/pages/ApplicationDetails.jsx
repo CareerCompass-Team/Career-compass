@@ -1,34 +1,32 @@
 import { useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { FileText, CheckCircle2, XCircle, ArrowRightCircle, CalendarDays, Clock, LayoutList } from 'lucide-react'
-import { useApplications } from '../context/ApplicationContext'
+import { FileText, PartyPopper, ChevronRight, Calendar } from 'lucide-react'
+import { useAppData } from '../context/AppDataContext'
 import CompanyAvatar from '../components/ui/CompanyAvatar'
 import Timeline from '../components/ui/Timeline'
 import DetailList from '../components/ui/DetailList'
+import Modal from '../components/ui/Modal'
+import Celebration from '../components/ui/Celebration'
 import StatusBadge from '../components/domain/StatusBadge'
+import { APPLICATION_STATUSES } from '../lib/status'
 
 export default function ApplicationDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
   const {
-    applications,
-    interviews,
-    jobs,
-    applyToSaved,
-    scheduleInterview,
-    addApplicationNote,
-    updateApplicationStatus,
-  } = useApplications()
-
-  const [noteText, setNoteText] = useState('')
-  const [interviewDate, setInterviewDate] = useState('')
-  const [interviewTime, setInterviewTime] = useState('')
-  const [interviewType, setInterviewType] = useState('Video')
-  const [interviewRound, setInterviewRound] = useState('Technical')
+    applications, interviews,
+    updateApplicationStatus, acceptOffer, declineOffer,
+    addApplicationNote, setApplicationNextStep, addInterview,
+  } = useAppData()
 
   const app = applications.find(a => a.id === id)
-  const interview = interviews.find(i => i.applicationId === id)
-  const job = jobs.find(j => j.id === app?.jobId)
+  const [noteDraft, setNoteDraft] = useState(app?.notes ?? '')
+  const [nextStepDraft, setNextStepDraft] = useState(app?.nextStep ?? '')
+  const [editingNote, setEditingNote] = useState(false)
+  const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
+  const [round, setRound] = useState('')
+  const [date, setDate] = useState('')
 
   if (!app) {
     return (
@@ -38,327 +36,249 @@ export default function ApplicationDetails() {
     )
   }
 
-  const handleAddNote = () => {
-    if (!noteText.trim()) return
-    addApplicationNote(app.id, noteText.trim())
-    setNoteText('')
+  const relatedInterviews = interviews.filter(iv => iv.applicationId === app.id)
+  const currentIdx = APPLICATION_STATUSES.indexOf(app.status)
+  const isTerminal = app.status === 'Accepted' || app.status === 'Not Selected'
+  const nextStatus = !isTerminal && currentIdx >= 0 && currentIdx < APPLICATION_STATUSES.length - 2
+    ? APPLICATION_STATUSES[currentIdx + 1]
+    : null
+
+  const handleAccept = () => {
+    acceptOffer(app.id)
+    setCelebrating(true)
+    setTimeout(() => setCelebrating(false), 1300)
   }
 
-  const handleScheduleInterview = event => {
-    event.preventDefault()
-    if (!interviewDate || !interviewTime || !interviewType) return
-    scheduleInterview({
-      appId: app.id,
-      date: interviewDate,
-      time: interviewTime,
-      type: interviewType,
-      round: interviewRound,
-    })
-    setInterviewDate('')
-    setInterviewTime('')
-    setInterviewType('Video')
-    setInterviewRound('Technical')
+  const handleSaveNote = () => {
+    addApplicationNote(app.id, noteDraft)
+    setEditingNote(false)
   }
 
-  const actions = []
-  if (app.status === 'Saved') {
-    actions.push({
-      key: 'apply',
-      label: 'Apply now',
-      variant: 'primary',
-      onClick: () => applyToSaved(app.id),
-      icon: <ArrowRightCircle size={14} />,
-    })
+  const handleSchedule = () => {
+    if (!round.trim() || !date.trim()) return
+    const newId = addInterview(app.id, { round, date, time: 'TBD', type: 'Video' })
+    setShowScheduleModal(false)
+    setRound('')
+    setDate('')
+    navigate(`/interviews/${newId}`)
   }
-
-  if (app.status === 'Applied') {
-    actions.push({
-      key: 'schedule',
-      label: 'Add interview details below',
-      variant: 'secondary',
-      onClick: () => {
-        document.getElementById('schedule-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      },
-    })
-  }
-
-  if (app.status === 'Interview') {
-    if (interview?.meetingLink) {
-      actions.push({
-        key: 'join',
-        label: 'Join meeting',
-        variant: 'primary',
-        href: interview.meetingLink,
-        icon: <ArrowRightCircle size={14} />,
-      })
-    }
-    if (interview) {
-      actions.push({
-        key: 'practice',
-        label: 'Practice interview',
-        variant: 'secondary',
-        onClick: () => navigate(`/interviews/${interview.id}/practice`),
-      })
-    }
-    actions.push({
-      key: 'complete',
-      label: 'Mark interview complete',
-      variant: 'secondary',
-      onClick: () => updateApplicationStatus(app.id, 'Offer', 'Offer pending'),
-    })
-  }
-
-  if (app.status === 'Offer') {
-    actions.push({
-      key: 'accept',
-      label: 'Accept offer',
-      variant: 'primary',
-      onClick: () => updateApplicationStatus(app.id, 'Accepted', 'Role accepted'),
-      icon: <CheckCircle2 size={14} />,
-    })
-    actions.push({
-      key: 'decline',
-      label: 'Decline offer',
-      variant: 'secondary',
-      onClick: () => updateApplicationStatus(app.id, 'Not Selected', 'Offer declined'),
-      icon: <XCircle size={14} />,
-    })
-  }
-
-  const isInternalLink = job?.jobLink?.startsWith('/')
 
   return (
-    <div className="p-8 max-w-5xl mx-auto animate-fadeIn">
+    <div className="p-8 max-w-5xl mx-auto animate-fadeIn relative">
+      {celebrating && <Celebration />}
+
       <div className="flex items-center gap-2 text-xs mb-6" style={{ color: 'var(--text-5)' }}>
         <Link to="/applications" style={{ color: 'var(--accent)' }}>Applications</Link>
         <span>/</span>
         <span>{app.company}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[2.3fr_1fr] gap-6">
-        <div className="space-y-5">
-          <div className="rounded-3xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-2 flex flex-col gap-5">
+          {/* Header */}
+          <div className="rounded-xl p-6 relative overflow-hidden" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
             <div className="flex items-start gap-4">
               <CompanyAvatar name={app.company} size="lg" />
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-3">
-                  <StatusBadge status={app.status} showDot />
-                  <span className="text-sm" style={{ color: 'var(--text-5)' }}>{app.nextStep}</span>
-                </div>
-                <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>{app.role}</h1>
-                <div className="text-sm font-medium" style={{ color: 'var(--accent-text)' }}>{app.company}</div>
+                <h1 className="font-display text-xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>{app.role}</h1>
+                <div className="text-sm font-medium mb-3" style={{ color: 'var(--accent-text)' }}>{app.company}</div>
+                <StatusBadge status={app.status} showDot />
               </div>
             </div>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <DetailList
-                items={[
-                  { label: 'Applied', value: app.appliedDate || 'Not applied' },
-                  { label: 'Interview', value: interview ? `${interview.date} • ${interview.time}` : 'Not scheduled' },
-                ]}
-              />
-              <DetailList
-                items={[
-                  { label: 'Deadline', value: app.deadline },
-                  { label: 'Application source', value: app.source },
-                ]}
-              />
-            </div>
-
-            {job?.jobLink && (
-              <div className="mt-5 text-sm text-right">
-                <Link
-                  to={isInternalLink ? job.jobLink : '#'}
-                  target={isInternalLink ? undefined : '_blank'}
-                  rel={isInternalLink ? undefined : 'noreferrer'}
-                  style={{ color: 'var(--accent)' }}
-                >
-                  View job posting {isInternalLink ? '' : 'on external site'}
-                </Link>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-3xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
-            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--text-5)' }}>
-              Interview schedule
-            </h2>
-            {app.status === 'Applied' ? (
-              <form id="schedule-form" onSubmit={handleScheduleInterview} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="block text-sm text-slate-500">
-                    Date
-                    <input
-                      value={interviewDate}
-                      onChange={e => setInterviewDate(e.target.value)}
-                      type="date"
-                      className="mt-2 w-full rounded-2xl border px-3 py-2"
-                    />
-                  </label>
-                  <label className="block text-sm text-slate-500">
-                    Time
-                    <input
-                      value={interviewTime}
-                      onChange={e => setInterviewTime(e.target.value)}
-                      type="time"
-                      className="mt-2 w-full rounded-2xl border px-3 py-2"
-                    />
-                  </label>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="block text-sm text-slate-500">
-                    Interview type
-                    <select
-                      value={interviewType}
-                      onChange={e => setInterviewType(e.target.value)}
-                      className="mt-2 w-full rounded-2xl border px-3 py-2"
-                    >
-                      <option>Video</option>
-                      <option>Phone</option>
-                      <option>Take-home</option>
-                      <option>Onsite</option>
-                    </select>
-                  </label>
-                  <label className="block text-sm text-slate-500">
-                    Round
-                    <input
-                      value={interviewRound}
-                      onChange={e => setInterviewRound(e.target.value)}
-                      type="text"
-                      className="mt-2 w-full rounded-2xl border px-3 py-2"
-                      placeholder="Technical, Final, Recruiter"
-                    />
-                  </label>
-                </div>
-
+            {app.status === 'Offer' && (
+              <div className="mt-5 pt-5 flex items-center gap-3" style={{ borderTop: '1px solid var(--border-3)' }}>
                 <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold"
-                  style={{ background: 'var(--accent)', color: 'white' }}
+                  onClick={handleAccept}
+                  className="text-sm px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 press-scale"
+                  style={{ background: '#10b981', color: 'white' }}
                 >
-                  <CalendarDays size={16} />
-                  Save interview schedule
+                  <PartyPopper size={16} />Accept Offer
                 </button>
-              </form>
-            ) : interview ? (
-              <div className="space-y-3 text-sm" style={{ color: 'var(--text-3)' }}>
-                <div className="flex items-center gap-2"><Clock size={14} /> {interview.date} at {interview.time}</div>
-                <div className="flex items-center gap-2"><LayoutList size={14} /> {interview.type} — {interview.round}</div>
-                {interview.meetingLink && (
-                  <a href={interview.meetingLink} target="_blank" rel="noreferrer" className="text-sm font-semibold" style={{ color: 'var(--accent)' }}>
-                    Join meeting
-                  </a>
-                )}
+                <button
+                  onClick={() => declineOffer(app.id)}
+                  className="text-sm px-4 py-2.5 rounded-xl font-medium press-scale"
+                  style={{ color: 'var(--text-4)', border: '1px solid var(--border-1)' }}
+                >
+                  Decline
+                </button>
               </div>
-            ) : (
-              <div className="text-sm" style={{ color: 'var(--text-4)' }}>
-                No interview scheduled yet. Use the applied action to add an interview date and type.
+            )}
+
+            {app.status === 'Accepted' && (
+              <div
+                className="mt-5 pt-5 flex items-center gap-2 text-sm font-medium animate-celebrate"
+                style={{ borderTop: '1px solid var(--border-3)', color: '#10b981' }}
+              >
+                <PartyPopper size={16} />You accepted this offer. Congratulations!
+              </div>
+            )}
+
+            {nextStatus && app.status !== 'Offer' && (
+              <div className="mt-5 pt-5 flex items-center gap-3" style={{ borderTop: '1px solid var(--border-3)' }}>
+                <button
+                  onClick={() => updateApplicationStatus(app.id, nextStatus, `Moved to ${nextStatus}`)}
+                  className="text-sm px-4 py-2 rounded-lg font-medium flex items-center gap-1.5 press-scale"
+                  style={{ background: 'var(--accent-bg)', color: 'var(--accent-text)', border: '1px solid var(--border-2)' }}
+                >
+                  Advance to {nextStatus}<ChevronRight size={14} />
+                </button>
+                {(app.status === 'Applied' || app.status === 'Screening') && (
+                  <button
+                    onClick={() => setShowScheduleModal(true)}
+                    className="text-sm px-4 py-2 rounded-lg font-medium flex items-center gap-1.5 press-scale"
+                    style={{ color: 'var(--text-3)', border: '1px solid var(--border-1)' }}
+                  >
+                    <Calendar size={14} />Schedule Interview
+                  </button>
+                )}
+                <button
+                  onClick={() => updateApplicationStatus(app.id, 'Not Selected', 'Marked as not selected')}
+                  className="text-sm px-3 py-2 rounded-lg font-medium press-scale ml-auto"
+                  style={{ color: 'var(--text-5)' }}
+                >
+                  Mark as Not Selected
+                </button>
               </div>
             )}
           </div>
 
-          <div className="rounded-3xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
-            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--text-5)' }}>
-              Job documents
-            </h2>
-            {[
-              { label: 'CV', value: app.resumeName },
-              { label: 'Cover letter', value: app.coverLetter },
-            ].map(({ label, value }) => (
-              <div key={label} className="mb-4">
-                <div className="text-xs mb-1" style={{ color: 'var(--text-5)' }}>{label}</div>
-                <div className="text-sm" style={{ color: value ? 'var(--accent-text)' : 'var(--text-5)' }}>
-                  {value || 'Not provided'}
-                </div>
+          {/* Timeline */}
+          <div className="rounded-xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+            <h2 className="font-display text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: 'var(--text-5)' }}>Timeline</h2>
+            <Timeline items={app.timeline} />
+          </div>
+
+          {/* Interviews */}
+          {relatedInterviews.length > 0 && (
+            <div className="rounded-xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+              <h2 className="font-display text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: 'var(--text-5)' }}>Interviews</h2>
+              <div className="flex flex-col gap-2">
+                {relatedInterviews.map(iv => (
+                  <Link
+                    key={iv.id}
+                    to={`/interviews/${iv.id}`}
+                    className="flex items-center justify-between text-sm px-3 py-2.5 rounded-lg transition-colors"
+                    style={{ background: 'var(--surface-hover)', color: 'var(--text-2)' }}
+                  >
+                    <span>{iv.round} — {iv.date}</span>
+                    <StatusBadge status={iv.status} kind="interview" />
+                  </Link>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+
+          {/* Notes */}
+          <div className="rounded-xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+            <h2 className="font-display text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: 'var(--text-5)' }}>Notes</h2>
+            {editingNote ? (
+              <>
+                <textarea
+                  value={noteDraft}
+                  onChange={e => setNoteDraft(e.target.value)}
+                  rows={4}
+                  className="w-full text-sm rounded-lg p-3 outline-none resize-none"
+                  style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-2)' }}
+                />
+                <div className="flex gap-2 mt-3">
+                  <button onClick={handleSaveNote} className="text-xs px-3 py-1.5 rounded-lg font-medium press-scale" style={{ background: 'var(--accent)', color: 'white' }}>Save</button>
+                  <button onClick={() => { setEditingNote(false); setNoteDraft(app.notes) }} className="text-xs px-3 py-1.5 rounded-lg press-scale" style={{ color: 'var(--text-4)' }}>Cancel</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm leading-relaxed mb-3" style={{ color: 'var(--text-3)' }}>{app.notes || 'No notes yet.'}</p>
+                <button
+                  onClick={() => setEditingNote(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg transition-colors press-scale"
+                  style={{ background: 'var(--accent-bg)', color: 'var(--accent-text)', border: '1px solid var(--border-2)' }}
+                >
+                  {app.notes ? 'Edit Note' : '+ Add Note'}
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        <aside className="space-y-5">
-          <div className="rounded-3xl p-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
-            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.2em] mb-4" style={{ color: 'var(--text-5)' }}>
-              Notes
-            </h2>
-            <div className="space-y-3">
-              {app.notes.length > 0 ? (
-                app.notes.map((note, idx) => (
-                  <div key={`${note}-${idx}`} className="rounded-2xl p-3" style={{ background: 'var(--surface-very-faint)', color: 'var(--text-3)' }}>
-                    {note}
-                  </div>
-                ))
-              ) : (
-                <div className="text-sm" style={{ color: 'var(--text-4)' }}>No notes on this application yet.</div>
-              )}
-            </div>
-            <div className="mt-4">
-              <textarea
-                value={noteText}
-                onChange={e => setNoteText(e.target.value)}
-                rows={4}
-                placeholder="Add a note about the application, interview prep, or next steps."
-                className="w-full rounded-3xl border px-4 py-3 text-sm leading-relaxed"
-                style={{ background: 'var(--surface-very-faint)', color: 'var(--text-2)' }}
-              />
-              <button
-                type="button"
-                className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold"
-                style={{ background: 'var(--accent)', color: 'white' }}
-                onClick={handleAddNote}
-              >
-                Add note
-              </button>
-            </div>
+        {/* Sidebar */}
+        <div className="flex flex-col gap-4">
+          <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+            <h2 className="font-display text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: 'var(--text-5)' }}>Details</h2>
+            <DetailList
+              items={[
+                { label: 'Applied', value: app.appliedDate || 'Not applied' },
+                { label: 'Deadline', value: app.deadline },
+                { label: 'Location', value: app.location },
+                { label: 'Source', value: app.source },
+              ]}
+            />
           </div>
 
-          <div className="rounded-3xl p-6 flex flex-col gap-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
-            <h2 className="font-display text-sm font-semibold uppercase tracking-[0.2em] mb-2" style={{ color: 'var(--text-5)' }}>
-              Actions
-            </h2>
-            {actions.length === 0 ? (
-              <div className="text-sm" style={{ color: 'var(--text-4)' }}>
-                No direct action needed right now. Use the timeline or notes to track this application.
-              </div>
-            ) : (
-              actions.map(action => (
-                action.href ? (
-                  <a
-                    key={action.key}
-                    href={action.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 w-full justify-center rounded-full px-3 py-3 text-sm font-semibold"
-                    style={{
-                      background: action.variant === 'primary' ? 'var(--accent)' : 'var(--surface-faint)',
-                      color: action.variant === 'primary' ? 'white' : 'var(--text-2)',
-                      border: action.variant === 'secondary' ? '1px solid var(--border-2)' : 'none',
-                    }}
-                  >
-                    {action.icon}
-                    {action.label}
-                  </a>
-                ) : (
-                  <button
-                    key={action.key}
-                    type="button"
-                    className="inline-flex items-center gap-2 w-full justify-center rounded-full px-3 py-3 text-sm font-semibold"
-                    style={{
-                      background: action.variant === 'primary' ? 'var(--accent)' : 'var(--surface-faint)',
-                      color: action.variant === 'primary' ? 'white' : 'var(--text-2)',
-                      border: action.variant === 'secondary' ? '1px solid var(--border-2)' : 'none',
-                    }}
-                    onClick={action.onClick}
-                  >
-                    {action.icon}
-                    {action.label}
-                  </button>
-                )
-              ))
-            )}
+          <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+            <h2 className="font-display text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: 'var(--text-5)' }}>Next Step</h2>
+            <input
+              value={nextStepDraft}
+              onChange={e => setNextStepDraft(e.target.value)}
+              onBlur={() => setApplicationNextStep(app.id, nextStepDraft)}
+              className="w-full text-sm rounded-lg px-3 py-2 outline-none"
+              style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-2)' }}
+            />
           </div>
-        </aside>
+
+          <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
+            <h2 className="font-display text-xs font-semibold uppercase tracking-wide mb-4" style={{ color: 'var(--text-5)' }}>Documents</h2>
+            <div className="flex flex-col gap-3">
+              {[{ label: 'CV Submitted', value: app.resumeName }, { label: 'Cover Letter', value: app.coverLetter }].map(({ label, value }) => (
+                <div key={label}>
+                  <div className="text-xs mb-1" style={{ color: 'var(--text-5)' }}>{label}</div>
+                  {value ? (
+                    <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--accent-text)' }}>
+                      <FileText size={14} strokeWidth={2} aria-hidden="true" />{value}
+                    </div>
+                  ) : (
+                    <div className="text-sm" style={{ color: 'var(--text-5)' }}>None</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
+
+      {showScheduleModal && (
+        <Modal title="Schedule an Interview" onClose={() => setShowScheduleModal(false)}>
+          <div className="flex flex-col gap-3">
+            <label className="text-xs" style={{ color: 'var(--text-5)' }}>
+              Round
+              <input
+                value={round}
+                onChange={e => setRound(e.target.value)}
+                placeholder="e.g. Technical Interview"
+                className="w-full mt-1 text-sm rounded-lg px-3 py-2 outline-none"
+                style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-2)' }}
+              />
+            </label>
+            <label className="text-xs" style={{ color: 'var(--text-5)' }}>
+              Date
+              <input
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                placeholder="e.g. Aug 20, 2024"
+                className="w-full mt-1 text-sm rounded-lg px-3 py-2 outline-none"
+                style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-2)' }}
+              />
+            </label>
+            <button
+              onClick={handleSchedule}
+              className="mt-2 text-sm px-5 py-2.5 rounded-xl font-medium press-scale"
+              style={{ background: 'var(--accent)', color: 'white' }}
+            >
+              Schedule
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

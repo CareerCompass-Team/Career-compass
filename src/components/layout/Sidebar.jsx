@@ -1,8 +1,10 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTheme } from '../../context/ThemeContext'
-import { profile } from '../../data/mockData'
+import { useAppData } from '../../context/AppDataContext'
+import CompassLogo from '../ui/CompassLogo'
+import { LogOut, LogIn, ShieldCheck } from 'lucide-react'
 
-const navItems = [
+const candidateNavItems = [
   {
     section: 'MAIN',
     items: [
@@ -14,13 +16,13 @@ const navItems = [
     section: 'APPLICATIONS',
     items: [
       { path: '/applications', label: 'Applications', icon: ClipboardIcon },
-      { path: '/interviews', label: 'Interviews', icon: MicIcon },
+      { path: '/interviews', label: 'Interviews & Reminders', icon: MicIcon },
     ],
   },
   {
     section: 'DOCUMENTS',
     items: [
-      { path: '/resumes', label: 'CV Center', icon: FileIcon },
+      { path: '/resumes', label: 'CV Center & ATS Studio', icon: FileIcon },
     ],
   },
   {
@@ -31,40 +33,28 @@ const navItems = [
   },
 ]
 
-/* ── Logo: C-shape with compass arrow ── */
-function CompassLogo() {
-  return (
-    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-7 h-7">
-      <defs>
-        <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="55%" stopColor="#7c3aed" />
-          <stop offset="100%" stopColor="#3730a3" />
-        </linearGradient>
-        <linearGradient id="arrowGrad" x1="10" y1="22" x2="23" y2="9" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.5)" />
-          <stop offset="100%" stopColor="white" />
-        </linearGradient>
-      </defs>
-      <rect width="32" height="32" rx="8" fill="url(#logoGrad)" />
-      {/* C arc — open to the right */}
-      <path
-        d="M23 11C21 8.5 18.2 7 15 7C9.5 7 5 11.5 5 17C5 22.5 9.5 27 15 27C18.2 27 21 25.5 23 23"
-        stroke="white"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-        fill="none"
-        opacity="0.92"
-      />
-      {/* Arrow shaft pointing NE */}
-      <line x1="15" y1="20" x2="22" y2="13" stroke="url(#arrowGrad)" strokeWidth="2" strokeLinecap="round" />
-      {/* Arrow head */}
-      <polyline points="17.5,13 22,13 22,17.5" stroke="url(#arrowGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* Sparkle dot */}
-      <circle cx="26" cy="7" r="1.2" fill="white" opacity="0.6" />
-    </svg>
-  )
-}
+const recruiterNavItems = [
+  {
+    section: 'RECRUITER PORTAL',
+    items: [
+      { path: '/recruiter', label: 'Overview & Candidates', icon: HomeIcon },
+      { path: '/jobs', label: 'View All Jobs', icon: SearchIcon },
+    ],
+  },
+  {
+    section: 'HIRING',
+    items: [
+      { path: '/applications', label: 'Candidate Pipeline', icon: ClipboardIcon },
+      { path: '/interviews', label: 'Interview Reminders', icon: MicIcon },
+    ],
+  },
+  {
+    section: 'ACCOUNT',
+    items: [
+      { path: '/profile', label: 'Employer Profile', icon: UserIcon },
+    ],
+  },
+]
 
 function HomeIcon() {
   return (
@@ -130,6 +120,10 @@ function MoonIcon() {
 export default function Sidebar() {
   const location = useLocation()
   const { theme, toggle } = useTheme()
+  const { user, openAuthModal, openLogoutModal } = useAppData()
+
+
+  const navItems = user?.role === 'recruiter' ? recruiterNavItems : candidateNavItems
 
   return (
     <aside
@@ -150,7 +144,9 @@ export default function Sidebar() {
             <div className="font-display font-semibold text-sm tracking-tight" style={{ color: 'var(--text-1)' }}>
               CareerCompass
             </div>
-            <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--text-5)' }}>FIND · GROW</div>
+            <div className="font-mono text-[10px] tracking-wide" style={{ color: 'var(--text-5)' }}>
+              {user?.role === 'recruiter' ? 'RECRUITER PORTAL' : 'FIND · GROW'}
+            </div>
           </div>
         </div>
       </div>
@@ -166,7 +162,7 @@ export default function Sidebar() {
               {section}
             </div>
             {items.map(({ path, label, icon: Icon }) => {
-              const active = location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path))
+              const active = location.pathname === path || (path !== '/dashboard' && path !== '/recruiter' && location.pathname.startsWith(path))
               return (
                 <NavLink
                   key={path}
@@ -228,26 +224,52 @@ export default function Sidebar() {
 
       {/* ── User ── */}
       <div className="px-3 py-3" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
-        <div
-          className="flex items-center gap-2.5 px-2 py-2 rounded-xl cursor-pointer"
-          style={{ background: 'var(--surface-faint)' }}
-        >
+        {user?.isLoggedIn ? (
           <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #3b82f6)', color: 'white' }}
+            className="flex items-center justify-between px-2 py-2 rounded-xl"
+            style={{ background: 'var(--surface-faint)' }}
           >
-            {profile.avatar}
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs font-medium truncate" style={{ color: 'var(--text-2)' }}>
-              {profile.name.split(' ')[0]}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+                style={{
+                  background: user.role === 'recruiter' ? 'linear-gradient(135deg, #7c3aed, #9333ea)' : 'linear-gradient(135deg, #7c3aed, #3b82f6)',
+                  color: 'white',
+                }}
+              >
+                {user.avatar || 'U'}
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-medium truncate flex items-center gap-1" style={{ color: 'var(--text-2)' }}>
+                  {user?.name ? user.name.split(' ')[0] : 'User'}
+                  {user?.isVerifiedEmployer && <ShieldCheck size={12} className="text-emerald-500 shrink-0" />}
+                </div>
+                <div className="text-[10px] truncate" style={{ color: 'var(--text-5)' }}>
+                  {user.role === 'recruiter' ? (user.companyName || 'Recruiter') : user.experienceLevel}
+                </div>
+              </div>
             </div>
-            <div className="text-xs truncate" style={{ color: 'var(--text-5)' }}>
-              {profile.experienceLevel}
-            </div>
+            <button
+              onClick={openLogoutModal}
+              className="p-1.5 rounded hover:bg-red-500/10 hover:text-red-500 transition-colors"
+              title="Log out"
+              style={{ color: 'var(--text-5)' }}
+            >
+              <LogOut size={14} />
+            </button>
           </div>
-        </div>
+        ) : (
+          <button
+            onClick={() => openAuthModal('login')}
+            className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-white flex items-center justify-center gap-1.5 press-scale"
+            style={{ background: 'var(--accent)' }}
+          >
+            <LogIn size={14} /> Sign In / Register
+          </button>
+        )}
       </div>
     </aside>
   )
 }
+
+

@@ -19,7 +19,6 @@ export const jobs = [
     title: 'Frontend Developer Intern',
     location: 'Nairobi / Remote',
     type: 'Internship',
-    jobLink: '/jobs/j1',
     description: 'Join our engineering team to build beautiful, performant web interfaces using React. You will collaborate with senior engineers and product designers to ship real features used by thousands of developers across Africa.',
     responsibilities: [
       'Build reusable React components and maintain the design system',
@@ -42,7 +41,6 @@ export const jobs = [
     title: 'Software Engineering Intern',
     location: 'Nairobi',
     type: 'Internship',
-    jobLink: 'https://careers.safaricom.co.ke/jobs/software-engineering-intern',
     description: 'Work alongside our M-Pesa engineering team to develop and maintain scalable payment infrastructure. You will gain hands-on experience with large-scale distributed systems.',
     responsibilities: [
       'Develop and maintain backend services using Java and Node.js',
@@ -65,7 +63,6 @@ export const jobs = [
     title: 'React Developer Intern',
     location: 'Remote',
     type: 'Internship',
-    jobLink: '/jobs/j3',
     description: 'Help us build the next generation of our farmer-to-market digital platform using React and modern web technologies.',
     responsibilities: [
       'Implement new features on the React web application',
@@ -88,7 +85,6 @@ export const jobs = [
     title: 'AI Research Intern',
     location: 'Remote',
     type: 'Internship',
-    jobLink: 'https://careers.microsoft.com/professional/en-us/job/123456/AI-Research-Intern',
     description: 'Join the Microsoft Research AI team to work on cutting-edge machine learning projects. You will apply ML techniques to real problems and publish your work.',
     responsibilities: [
       'Run experiments on large language models',
@@ -111,7 +107,6 @@ export const jobs = [
     title: 'Frontend Engineer Intern',
     location: 'Lagos / Remote',
     type: 'Internship',
-    jobLink: '/jobs/j5',
     description: 'Build the next generation of fintech interfaces for Africa. You will work on high-impact products used across 34 African countries.',
     responsibilities: [
       'Build responsive UIs using React and TypeScript',
@@ -134,7 +129,6 @@ export const jobs = [
     title: 'Junior Full Stack Developer',
     location: 'Nairobi',
     type: 'Full-time',
-    jobLink: 'https://brck.com/careers/junior-full-stack-developer',
     description: 'Join our team building internet connectivity solutions for Africa. Work across our web platform, APIs, and IoT device management systems.',
     responsibilities: [
       'Build and maintain web applications using React and Node.js',
@@ -167,7 +161,7 @@ export const applications = [
     resumeId: 'r1',
     resumeName: 'Frontend_CV_v4.pdf',
     coverLetter: 'CoverLetter_Andela.pdf',
-    notes: ['Need to revise React hooks and state management patterns before the interview.'],
+    notes: 'Need to revise React hooks and state management patterns before the interview.',
     nextStep: 'Technical Interview — Aug 12',
     timeline: [
       { date: 'Aug 3', event: 'Application submitted' },
@@ -188,7 +182,7 @@ export const applications = [
     resumeId: 'r1',
     resumeName: 'General_CV.pdf',
     coverLetter: null,
-    notes: ['Strong brand, great learning opportunity. M-Pesa team is legendary.'],
+    notes: 'Strong brand, great learning opportunity. M-Pesa team is legendary.',
     nextStep: 'Awaiting response',
     timeline: [
       { date: 'Aug 5', event: 'Application submitted via LinkedIn' },
@@ -207,7 +201,7 @@ export const applications = [
     resumeId: 'r2',
     resumeName: 'Frontend_CV_v3.pdf',
     coverLetter: 'CoverLetter_Twiga.pdf',
-    notes: ['First round was a culture fit. Second round is a coding challenge.'],
+    notes: 'First round was a culture fit. Second round is a coding challenge.',
     nextStep: 'Coding challenge — Aug 14',
     timeline: [
       { date: 'Jul 28', event: 'Application submitted' },
@@ -228,7 +222,7 @@ export const applications = [
     resumeId: 'r2',
     resumeName: 'Frontend_CV_v4.pdf',
     coverLetter: 'CoverLetter_Flutterwave.pdf',
-    notes: ['Incredible team. Offer deadline is Aug 20. Need to decide.'],
+    notes: 'Incredible team. Offer deadline is Aug 20. Need to decide.',
     nextStep: 'Respond to offer by Aug 20',
     timeline: [
       { date: 'Jul 20', event: 'Application submitted' },
@@ -250,7 +244,7 @@ export const applications = [
     resumeId: 'r1',
     resumeName: 'General_CV.pdf',
     coverLetter: null,
-    notes: ['Long shot but worth trying. Strong Python background.'],
+    notes: 'Long shot but worth trying. Strong Python background.',
     nextStep: 'Awaiting response',
     timeline: [
       { date: 'Aug 7', event: 'Application submitted via company portal' },
@@ -269,7 +263,7 @@ export const applications = [
     resumeId: null,
     resumeName: null,
     coverLetter: null,
-    notes: ['Interesting role. Need to brush up on Node.js before applying.'],
+    notes: 'Interesting role. Need to brush up on Node.js before applying.',
     nextStep: 'Prepare and apply',
     timeline: [],
   },

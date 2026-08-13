@@ -1,21 +1,16 @@
-import { Link } from 'react-router-dom'
+import CompassLogo from '../ui/CompassLogo'
 
 export default function Footer() {
   return (
-    <footer className="max-w-6xl mx-auto px-6 py-12 text-sm" style={{ color: 'var(--text-3)' }}>
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <p>CareerCompass helps early-career jobseekers manage applications, interviews, and offers.</p>
-        <div className="flex flex-wrap gap-4">
-          <Link to="/jobs" className="hover:underline">
-            Jobs
-          </Link>
-          <Link to="/applications" className="hover:underline">
-            Applications
-          </Link>
-          <Link to="/interviews" className="hover:underline">
-            Interviews
-          </Link>
+    <footer style={{ borderTop: '1px solid var(--border-3)' }}>
+      <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <CompassLogo size={20} />
+          <span className="text-sm" style={{ color: 'var(--text-4)' }}>CareerCompass</span>
         </div>
+        <p className="text-xs" style={{ color: 'var(--text-5)' }}>
+          A Moringa School software engineering project.
+        </p>
       </div>
     </footer>
   )

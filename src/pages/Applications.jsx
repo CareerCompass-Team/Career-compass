@@ -1,156 +1,215 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Bell, Video } from 'lucide-react'
-import { useApplications } from '../context/ApplicationContext'
+import { LayoutGrid, List, Plus, Briefcase } from 'lucide-react'
+import { useAppData } from '../context/AppDataContext'
 import { APPLICATION_STATUSES } from '../lib/status'
 import ApplicationKanban from '../components/domain/ApplicationKanban'
 import ApplicationList from '../components/domain/ApplicationList'
+import CandidateReviewModal from '../components/ui/CandidateReviewModal'
+import Modal from '../components/ui/Modal'
 
 export default function Applications() {
-  const [view, setView] = useState('kanban') // 'kanban' | 'list'
-  const [statusFilter, setStatusFilter] = useState('All')
+  const { user, applications, updateApplicationStatus, postVerifiedJob } = useAppData()
+  const [view, setView] = useState('kanban')
+  const [selectedCandidate, setSelectedCandidate] = useState(null)
+  const [showPostJobModal, setShowPostJobModal] = useState(false)
 
-  const {
-    applications,
-    interviews,
-    deadlineAlerts,
-    upcomingInterview,
-    applyToSaved,
-    jobs,
-  } = useApplications()
+  // Post job form state for recruiter
+  const [jobTitle, setJobTitle] = useState('')
+  const [jobLocation, setJobLocation] = useState('Nairobi, Kenya')
+  const [jobType, setJobType] = useState('Full-time')
+  const [jobSalary, setJobSalary] = useState('KES 80,000 – 120,000/mo')
+  const [jobDesc, setJobDesc] = useState('')
 
-  const interviewsByApp = interviews.reduce((map, interview) => {
-    map[interview.applicationId] = interview
-    return map
-  }, {})
+  const isRecruiter = user?.role === 'recruiter'
 
-  const upcomingApplication = upcomingInterview && applications.find(app => app.id === upcomingInterview.applicationId)
-
-  const filtered = statusFilter === 'All'
-    ? applications
-    : applications.filter(a => a.status === statusFilter)
-
-  const navigate = useNavigate()
+  const handlePostJob = (e) => {
+    e.preventDefault()
+    if (!jobTitle.trim() || !jobDesc.trim()) return
+    postVerifiedJob({
+      title: jobTitle.trim(),
+      location: jobLocation,
+      type: jobType,
+      salary: jobSalary,
+      description: jobDesc.trim(),
+    })
+    setJobTitle('')
+    setJobDesc('')
+    setShowPostJobModal(false)
+  }
 
   return (
     <div className="p-8 max-w-6xl mx-auto animate-fadeIn">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl font-semibold mb-1" style={{ color: 'var(--text-1)' }}>
-            Applications
+            {isRecruiter ? 'Recruiter Candidate Pipeline' : 'Applications'}
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-4)' }}>
-            {applications.length} total applications
+            {isRecruiter
+              ? `${applications.length} candidate applications across your posted job listings`
+              : `${applications.length} total applications saved & submitted`}
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="flex rounded-lg overflow-hidden" style={{ border: '1px solid var(--border-1)' }}>
-            {['kanban', 'list'].map(v => (
-              <button
-                key={v}
-                onClick={() => setView(v)}
-                className="px-3 py-1.5 text-xs font-medium capitalize transition-colors"
-                style={{
-                  background: view === v ? 'var(--accent-bg)' : 'transparent',
-                  color: view === v ? 'var(--accent-text)' : 'var(--text-4)',
-                }}
-              >
-                {v === 'kanban' ? '⊞ Kanban' : '≡ List'}
-              </button>
-            ))}
+            <button
+              onClick={() => setView('kanban')}
+              className="px-3 py-1.5 text-xs font-medium transition-colors flex items-center gap-1.5 press-scale"
+              style={{ background: view === 'kanban' ? 'var(--accent-bg)' : 'transparent', color: view === 'kanban' ? 'var(--accent-text)' : 'var(--text-4)' }}
+            >
+              <LayoutGrid size={14} />Kanban
+            </button>
+            <button
+              onClick={() => setView('list')}
+              className="px-3 py-1.5 text-xs font-medium transition-colors flex items-center gap-1.5 press-scale"
+              style={{ background: view === 'list' ? 'var(--accent-bg)' : 'transparent', color: view === 'list' ? 'var(--accent-text)' : 'var(--text-4)' }}
+            >
+              <List size={14} />List
+            </button>
           </div>
 
-          <button
-            type="button"
-            className="text-sm px-4 py-2 rounded-lg font-medium"
-            style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))', color: 'white' }}
-            onClick={() => navigate('/jobs')}
-          >
-            + Add Application
-          </button>
+          {isRecruiter ? (
+            <button
+              onClick={() => setShowPostJobModal(true)}
+              className="text-xs px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 press-scale text-white"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+            >
+              <Plus size={14} /> Post New Job
+            </button>
+          ) : (
+            <a
+              href="/jobs"
+              className="text-xs px-4 py-2.5 rounded-xl font-semibold flex items-center gap-1.5 press-scale text-white"
+              style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))' }}
+            >
+              <Plus size={14} /> Find Jobs to Apply
+            </a>
+          )}
         </div>
       </div>
 
-      {deadlineAlerts.length > 0 && (
-        <div className="rounded-2xl p-5 mb-6" style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.16)' }}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>
-                Application deadline coming up
-              </p>
-              <p className="text-sm" style={{ color: 'var(--text-4)' }}>
-                You have {deadlineAlerts.length} saved/applied application(s) with deadlines in the next week.
-              </p>
-            </div>
-            <div className="text-sm font-medium" style={{ color: 'var(--text-5)' }}>
-              {deadlineAlerts.map(app => `${app.company} (${app.deadline})`).join(' • ')}
-            </div>
-          </div>
+      {applications.length === 0 ? (
+        <div className="rounded-xl p-12 text-center" style={{ background: 'var(--bg-card)', border: '1px dashed var(--border-2)' }}>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-4)' }}>
+            {isRecruiter
+              ? 'No applicant submissions yet. Post a job to attract candidates!'
+              : 'No applications yet — your job search starts on the Jobs page.'}
+          </p>
+          {isRecruiter ? (
+            <button
+              onClick={() => setShowPostJobModal(true)}
+              className="text-xs px-4 py-2 rounded-xl font-semibold text-white press-scale"
+              style={{ background: 'var(--accent)' }}
+            >
+              Post a Job
+            </button>
+          ) : (
+            <a href="/jobs" className="text-sm font-medium" style={{ color: 'var(--accent)' }}>Discover jobs →</a>
+          )}
         </div>
+      ) : view === 'kanban' ? (
+        <ApplicationKanban
+          applications={applications}
+          onCardClick={isRecruiter ? (app) => setSelectedCandidate(app) : undefined}
+        />
+      ) : (
+        <ApplicationList
+          applications={applications}
+          onCardClick={isRecruiter ? (app) => setSelectedCandidate(app) : undefined}
+        />
       )}
 
-      {upcomingInterview && upcomingApplication && (
-        <div
-          className="rounded-2xl p-5 mb-6"
-          style={{
-            background: 'rgba(59, 130, 246, 0.08)',
-            border: '1px solid rgba(59, 130, 246, 0.16)',
+      {/* Recruiter Candidate Review Modal */}
+      {selectedCandidate && (
+        <CandidateReviewModal
+          app={selectedCandidate}
+          onClose={() => setSelectedCandidate(null)}
+          onAction={(nextStage) => {
+            updateApplicationStatus(selectedCandidate.id, nextStage, `Recruiter updated status to ${nextStage}`)
           }}
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <div
-                className="rounded-2xl p-3"
-                style={{ background: 'rgba(59, 130, 246, 0.16)' }}
-              >
-                <Bell size={20} style={{ color: 'var(--accent)' }} />
+        />
+      )}
+
+      {/* Post Job Modal */}
+      {showPostJobModal && (
+        <Modal title="Post a Verified Job Opportunity" onClose={() => setShowPostJobModal(false)}>
+          <form onSubmit={handlePostJob} className="space-y-3">
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Job Title</label>
+              <input
+                type="text"
+                required
+                value={jobTitle}
+                onChange={e => setJobTitle(e.target.value)}
+                placeholder="e.g. Senior React Developer"
+                className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Location</label>
+                <input
+                  type="text"
+                  value={jobLocation}
+                  onChange={e => setJobLocation(e.target.value)}
+                  placeholder="Nairobi / Remote"
+                  className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                  style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
+                />
               </div>
               <div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--text-1)' }}>
-                  Upcoming interview
-                </p>
-                <p className="text-sm" style={{ color: 'var(--text-4)' }}>
-                  {upcomingApplication.company} — {upcomingInterview.date} at {upcomingInterview.time}
-                </p>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Job Type</label>
+                <select
+                  value={jobType}
+                  onChange={e => setJobType(e.target.value)}
+                  className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                  style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
+                >
+                  <option value="Full-time">Full-time</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Remote">Remote</option>
+                </select>
               </div>
             </div>
-            <a
-              href={upcomingInterview.meetingLink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold"
-              style={{ background: 'var(--accent)', color: 'white' }}
-            >
-              <Video size={16} />
-              Join Google Meet
-            </a>
-          </div>
-        </div>
-      )}
 
-      {view === 'kanban' ? (
-        <ApplicationKanban applications={filtered} interviewMap={interviewsByApp} applyToSaved={applyToSaved} jobs={jobs} />
-      ) : (
-        <>
-          <div className="flex items-center gap-2 mb-5">
-            {['All', ...APPLICATION_STATUSES].map(s => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className="text-xs px-3 py-1.5 rounded-lg transition-colors"
-                style={{
-                  background: statusFilter === s ? 'var(--accent-bg)' : 'var(--surface-hover)',
-                  color: statusFilter === s ? 'var(--accent-text)' : 'var(--text-4)',
-                  border: statusFilter === s ? '1px solid var(--border-1)' : '1px solid transparent',
-                }}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-          <ApplicationList applications={filtered} interviewMap={interviewsByApp} applyToSaved={applyToSaved} jobs={jobs} />
-        </>
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Salary Range</label>
+              <input
+                type="text"
+                value={jobSalary}
+                onChange={e => setJobSalary(e.target.value)}
+                placeholder="e.g. KES 80,000 – 120,000/mo"
+                className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Job Description & Requirements</label>
+              <textarea
+                rows={4}
+                required
+                value={jobDesc}
+                onChange={e => setJobDesc(e.target.value)}
+                placeholder="Describe role responsibilities, key technologies, and qualifications..."
+                className="w-full px-3 py-2.5 text-sm rounded-xl outline-none resize-none"
+                style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-xl font-semibold text-sm text-white press-scale"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+            >
+              Publish Listing with Anti-Scam Badge
+            </button>
+          </form>
+        </Modal>
       )}
     </div>
   )

@@ -1,3 +1,9 @@
+// The landing page's signature visual: a winding path through the four
+// real stages of CareerCompass's own application pipeline. Deliberately
+// reuses the same curved-connector language as components/ui/Timeline.jsx —
+// the marketing page and the product should feel like one continuous
+// thing, not a separate "brochure site" bolted onto the app.
+
 const STOPS = [
   { label: 'Discover', y: 40 },
   { label: 'Apply', y: 190 },

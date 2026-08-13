@@ -1,20 +1,30 @@
-// Knows about application statuses specifically (Saved/Applied/Interview/
-// Offer/Not Selected) — that's what makes this "domain" instead of "ui".
-// Colors come from lib/status.js, so there's exactly one place to change
-// a color, not one per page.
+// Renders a status pill for either an application or an interview.
+// All the actual color logic lives in lib/status.js — this component
+// just picks the right map based on `kind`.
 
-import { applicationStatusColor, applicationStatusBg } from '../../lib/status'
+import {
+  applicationStatusColor, applicationStatusBg,
+  interviewStatusColor, interviewStatusBg,
+  interviewResultColor, interviewResultBg,
+} from '../../lib/status'
 
-export default function StatusBadge({ status, showDot = false }) {
-  const color = applicationStatusColor[status]
-  const bg = applicationStatusBg[status]
+const MAPS = {
+  application: [applicationStatusColor, applicationStatusBg],
+  interview: [interviewStatusColor, interviewStatusBg],
+  result: [interviewResultColor, interviewResultBg],
+}
+
+export default function StatusBadge({ status, kind = 'application', showDot = false }) {
+  const [colorMap, bgMap] = MAPS[kind]
+  const color = colorMap[status]
+  const bg = bgMap[status]
 
   return (
     <span
-      className="inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium"
+      className="inline-flex items-center text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap"
       style={{ background: bg, color }}
     >
-      {showDot && <span className="w-1.5 h-1.5 rounded-full mr-2" style={{ background: color }} />}
+      {showDot && <span className="w-1.5 h-1.5 rounded-full mr-2 shrink-0" style={{ background: color }} />}
       {status}
     </span>
   )

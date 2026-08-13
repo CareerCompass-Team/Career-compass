@@ -1,6 +1,10 @@
+// Extracted from Sidebar.jsx, where it was previously a local, unexported
+// function — the landing page nav needs the exact same logo, so this is
+// the shared home for it rather than a second copy.
+
 export default function CompassLogo({ size = 28 }) {
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
       <defs>
         <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#a78bfa" />
