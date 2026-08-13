@@ -218,18 +218,88 @@ export function AppDataProvider({ children }) {
 
   // ---- Jobs ----
   const toggleSaveJob = jobId => {
-    setData(d => ({
-      ...d,
-      jobs: d.jobs.map(j => (j.id === jobId ? { ...j, saved: !j.saved } : j)),
-    }))
+    setData(d => {
+      const targetJob = d.jobs.find(j => j.id === jobId)
+      if (!targetJob) return d
+
+      const willBeSaved = !targetJob.saved
+
+      // Update jobs array
+      const updatedJobs = d.jobs.map(j => (j.id === jobId ? { ...j, saved: willBeSaved } : j))
+
+      // Sync with applications array under status: 'Saved'
+      let updatedApps = [...d.applications]
+      const existingApp = updatedApps.find(a => a.jobId === jobId)
+
+      if (willBeSaved) {
+        if (!existingApp) {
+          const newSavedApp = {
+            id: uid('a'),
+            jobId: targetJob.id,
+            company: targetJob.company,
+            role: targetJob.title,
+            status: 'Saved',
+            appliedDate: null,
+            deadline: targetJob.deadline,
+            location: targetJob.location,
+            source: targetJob.source || 'CareerCompass',
+            resumeId: null,
+            resumeName: null,
+            coverLetter: null,
+            notes: 'Saved to wishlist for review',
+            nextStep: 'Prepare application & CV',
+            timeline: [{ date: today(), event: 'Job saved to wishlist' }],
+          }
+          updatedApps = [newSavedApp, ...updatedApps]
+        }
+      } else {
+        // If unsaved and it's currently in 'Saved' status, remove from applications
+        if (existingApp && existingApp.status === 'Saved') {
+          updatedApps = updatedApps.filter(a => a.id !== existingApp.id)
+        }
+      }
+
+      return {
+        ...d,
+        jobs: updatedJobs,
+        applications: updatedApps,
+      }
+    })
   }
 
   const applyToJob = (jobId, { resumeId = null, resumeName = null, coverLetter = null } = {}) => {
     const job = data.jobs.find(j => j.id === jobId)
     if (!job) return null
-    const existing = data.applications.find(a => a.jobId === jobId)
-    if (existing) return existing.id
 
+    const existing = data.applications.find(a => a.jobId === jobId)
+
+    // If existing app is already submitted (not 'Saved'), return existing ID
+    if (existing && existing.status !== 'Saved') {
+      return existing.id
+    }
+
+    if (existing && existing.status === 'Saved') {
+      // Transition existing 'Saved' app to 'Applied'
+      const updatedApp = {
+        ...existing,
+        status: 'Applied',
+        appliedDate: today(),
+        resumeId,
+        resumeName,
+        coverLetter,
+        nextStep: 'Awaiting recruiter response',
+        timeline: [...existing.timeline, { date: today(), event: 'Application submitted to verified employer' }],
+      }
+
+      setData(d => ({
+        ...d,
+        applications: d.applications.map(a => (a.id === existing.id ? updatedApp : a)),
+        jobs: d.jobs.map(j => (j.id === jobId ? { ...j, saved: true } : j)),
+      }))
+      return existing.id
+    }
+
+    // Create fresh application if none existed
     const newApp = {
       id: uid('a'),
       jobId,
@@ -239,7 +309,7 @@ export function AppDataProvider({ children }) {
       appliedDate: today(),
       deadline: job.deadline,
       location: job.location,
-      source: 'CareerCompass',
+      source: job.source || 'CareerCompass',
       resumeId,
       resumeName,
       coverLetter,
@@ -248,7 +318,11 @@ export function AppDataProvider({ children }) {
       timeline: [{ date: today(), event: 'Application submitted to verified employer' }],
     }
 
-    setData(d => ({ ...d, applications: [newApp, ...d.applications] }))
+    setData(d => ({
+      ...d,
+      applications: [newApp, ...d.applications],
+      jobs: d.jobs.map(j => (j.id === jobId ? { ...j, saved: true } : j)),
+    }))
     return newApp.id
   }
 
