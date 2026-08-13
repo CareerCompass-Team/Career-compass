@@ -1,11 +1,15 @@
-function JobCard({ title, company, location, type }) {
+import { Link } from "react-router-dom";
+
+function JobCard({ id, title, company, location, type }) {
   return (
-    <div>
-      <h3>{title}</h3>
-      <p>{company}</p>
-      <p>{location}</p>
-      <p>{type}</p>
-    </div>
+    <Link to={`/jobs/${id}`}>
+      <div>
+        <h3>{title}</h3>
+        <p>{company}</p>
+        <p>{location}</p>
+        <p>{type}</p>
+      </div>
+    </Link>
   );
 }
 
