@@ -7,11 +7,13 @@ import jobs from "./data/jobs";
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [location, setLocation] = useState("");
+  const [jobType, setJobType] = useState("");
 
   const filteredJobs = jobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (location === "" || job.location === location),
+      (location === "" || job.location === location) &&
+      (jobType === "" || job.type === jobType),
   );
 
   return (
@@ -24,6 +26,8 @@ function App() {
         setSearchTerm={setSearchTerm}
         location={location}
         setLocation={setLocation}
+        jobType={jobType}
+        setJobType={setJobType}
       />
 
       <div>
