@@ -9,6 +9,7 @@ import {
 import { useAppData } from '../context/AppDataContext'
 import VerificationModal from '../components/ui/VerificationModal'
 import Modal from '../components/ui/Modal'
+import CandidateReviewModal from '../components/ui/CandidateReviewModal'
 import { RECRUITER_LISTINGS, RECRUITER_CANDIDATES } from '../data/recruiterMockData'
 
 const STAGES = [
@@ -453,14 +454,25 @@ export default function RecruiterDashboard() {
             ))}
           </div>
 
-          {/* Side panel: Candidate Review */}
+          {/* Modal: Candidate Review */}
           {selectedCandidate && (
-            <CandidateReviewPanel
-              candidate={selectedCandidate}
-              listing={listings.find(l => l.id === selectedCandidate.listingId)}
+            <CandidateReviewModal
+              app={{
+                id: selectedCandidate.id,
+                candidateName: selectedCandidate.name,
+                candidateEmail: selectedCandidate.email || 'candidate@example.com',
+                candidatePhone: selectedCandidate.phone || '+254 700 000 000',
+                role: listings.find(l => l.id === selectedCandidate.listingId)?.title || selectedCandidate.role || 'Open Role',
+                company: user?.companyName || 'Safaricom',
+                status: selectedCandidate.stage || 'Applied',
+                atsScore: selectedCandidate.atsScore || 85,
+                coverLetter: selectedCandidate.coverLetter || 'Strong background in modern software engineering...',
+              }}
               onClose={() => setSelectedCandidate(null)}
-              onMove={moveStage}
-              onSchedule={c => { setCandidateForSchedule(c); setShowScheduleModal(true) }}
+              onAction={(nextStage) => {
+                moveStage(selectedCandidate.id, nextStage)
+                setSelectedCandidate(null)
+              }}
             />
           )}
         </div>
@@ -794,127 +806,3 @@ function PipelineColumn({ stage, candidates, listings, onReview, onMove, onSched
   )
 }
 
-// ── Candidate Detail Side Panel ───────────────────────────────────────────────
-function CandidateReviewPanel({ candidate: c, listing, onClose, onMove, onSchedule }) {
-  const actions = NEXT_ACTIONS[c.stage] || []
-  return (
-    <div
-      className="fixed inset-y-0 right-0 z-40 flex flex-col shadow-2xl border-l animate-fadeIn"
-      style={{ width: '380px', background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
-    >
-      {/* Panel Header */}
-      <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--border-1)' }}>
-        <div>
-          <div className="font-bold text-base flex items-center gap-2" style={{ color: 'var(--text-1)' }}>
-            {c.name}
-          </div>
-          <div className="text-xs" style={{ color: 'var(--accent-text)' }}>{listing?.title || 'Open Role'}</div>
-        </div>
-        <div className="flex items-center gap-2">
-          <ScoreBadge score={c.atsScore} />
-          <button onClick={onClose} className="text-xs p-1.5 rounded-lg hover:bg-red-500/10 transition-colors" style={{ color: 'var(--text-4)' }}>✕</button>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
-        {/* Contact */}
-        <div className="space-y-1.5 text-xs" style={{ color: 'var(--text-3)' }}>
-          <div className="flex items-center gap-2"><GraduationCap size={12} className="shrink-0" />{c.course}</div>
-          <div className="flex items-center gap-2"><MapPin size={12} className="shrink-0" />{c.location}</div>
-          <div className="flex items-center gap-2"><Phone size={12} className="shrink-0" />{c.phone}</div>
-        </div>
-
-        {/* Skill Match */}
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-5)' }}>Skill Match Analysis</div>
-          <div className="flex flex-col gap-1.5">
-            {c.matchedSkills.map(s => (
-              <div key={s} className="text-xs flex items-center gap-1.5">
-                <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                <span style={{ color: 'var(--text-2)' }}>{s}</span>
-              </div>
-            ))}
-            {c.missingSkills.map(s => (
-              <div key={s} className="text-xs flex items-center gap-1.5">
-                <XCircle size={13} className="text-red-400 shrink-0" />
-                <span style={{ color: 'var(--text-4)' }}>{s} — not demonstrated</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cover Letter */}
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-5)' }}>Cover Letter Excerpt</div>
-          <p className="text-xs leading-relaxed p-3 rounded-xl border italic" style={{ background: 'var(--bg-page)', borderColor: 'var(--border-2)', color: 'var(--text-3)' }}>
-            "{c.coverLetter}"
-          </p>
-        </div>
-
-        {/* CV file */}
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-5)' }}>Submitted CV</div>
-          <div className="text-xs flex items-center gap-2 p-3 rounded-xl border" style={{ background: 'var(--bg-page)', borderColor: 'var(--border-2)' }}>
-            <FileText size={15} className="text-violet-400 shrink-0" />
-            <span style={{ color: 'var(--accent-text)' }}>{c.cvFile}</span>
-          </div>
-        </div>
-
-        {/* Notes */}
-        {c.notes && (
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-5)' }}>Recruiter Notes</div>
-            <p className="text-xs leading-relaxed p-3 rounded-xl border" style={{ background: 'rgba(124,58,237,0.06)', borderColor: 'rgba(124,58,237,0.2)', color: 'var(--text-3)' }}>
-              {c.notes}
-            </p>
-          </div>
-        )}
-
-        {/* Interview info */}
-        {c.interviewDate && (
-          <div>
-            <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-5)' }}>Interview Scheduled</div>
-            <div className="text-xs p-3 rounded-xl border flex items-center justify-between" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.25)' }}>
-              <span className="font-mono text-amber-400 font-bold">{c.interviewDate} at {c.interviewTime}</span>
-              {c.meetLink && (
-                <a href={c.meetLink} target="_blank" rel="noopener noreferrer" className="text-[10px] px-2.5 py-1 rounded-lg font-bold text-white" style={{ background: '#10b981' }}>
-                  Join Meeting
-                </a>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Timeline */}
-        <div>
-          <div className="text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-5)' }}>Activity Timeline</div>
-          <div className="space-y-2 relative before:absolute before:left-2.5 before:top-1 before:bottom-1 before:w-0.5 before:bg-slate-700/30">
-            {c.timeline.map((t, i) => (
-              <div key={i} className="flex items-start gap-3 pl-6 relative">
-                <div className="absolute left-1 top-1.5 w-3 h-3 rounded-full bg-violet-500 border-2" style={{ borderColor: 'var(--bg-card)' }} />
-                <div>
-                  <span className="text-[10px] font-bold font-mono" style={{ color: 'var(--accent-text)' }}>{t.date}</span>
-                  <p className="text-xs" style={{ color: 'var(--text-3)' }}>{t.event}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Panel Footer Actions */}
-      <div className="p-4 border-t space-y-2" style={{ borderColor: 'var(--border-1)' }}>
-        {actions.map(action => (
-          <button
-            key={action.next}
-            onClick={() => { if (action.next === 'Interview') onSchedule(c); onMove(c.id, action.next); onClose() }}
-            className="w-full py-2.5 rounded-xl text-sm font-bold press-scale text-white"
-            style={{ background: action.color }}
-          >
-            {action.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   LayoutGrid, List, Plus, Search, Bookmark, Send, CalendarClock,
   Trophy, Sparkles, Zap, ShieldCheck, CheckCircle2, ArrowRight,
-  RefreshCw, Info, Filter,
+  RefreshCw, Info, Filter, Users, UserCheck, Briefcase
 } from 'lucide-react'
 import { useAppData } from '../context/AppDataContext'
 import { APPLICATION_STATUSES } from '../lib/status'
@@ -33,28 +33,32 @@ export default function Applications() {
 
   const isRecruiter = user?.role === 'recruiter'
 
-  // Metric counts
+  // Candidate metric counts
   const savedCount = applications.filter(a => a.status === 'Saved').length
   const activeCount = applications.filter(a => ['Applied', 'Screening', 'Interview', 'Final Stage'].includes(a.status)).length
   const interviewCount = applications.filter(a => a.status === 'Interview').length
   const offerCount = applications.filter(a => a.status === 'Offer' || a.status === 'Accepted').length
 
+  // Recruiter metric counts
+  const screeningCount = applications.filter(a => a.status === 'Screening').length
+  const acceptedCount = applications.filter(a => a.status === 'Accepted').length
+
   // Filter applications by search text and status category
   const filteredApps = applications.filter(app => {
     if (search.trim()) {
       const q = search.toLowerCase()
-      const matchComp = app.company.toLowerCase().includes(q)
-      const matchRole = app.role.toLowerCase().includes(q)
-      if (!matchComp && !matchRole) return false
+      const matchComp = app.company?.toLowerCase().includes(q)
+      const matchRole = app.role?.toLowerCase().includes(q)
+      const matchCandidate = app.candidateName?.toLowerCase().includes(q)
+      if (!matchComp && !matchRole && !matchCandidate) return false
     }
     if (statusFilter === 'Saved') return app.status === 'Saved'
-    if (statusFilter === 'Active') return ['Applied', 'Screening', 'Interview', 'Final Stage'].includes(app.status)
+    if (statusFilter === 'Active' || statusFilter === 'Screening') return ['Applied', 'Screening', 'Interview', 'Final Stage'].includes(app.status)
     if (statusFilter === 'Offers') return ['Offer', 'Accepted'].includes(app.status)
     return true
   })
 
   // ── Recruiter Live Response Simulator ─────────────────────────────
-  // Simulates real-time employer ATS / Email Webhook updates
   const handleSimulateEmployerEvent = () => {
     const candidatesForEvents = applications.filter(a => a.status !== 'Accepted' && a.status !== 'Not Selected')
     if (candidatesForEvents.length === 0) {
@@ -66,8 +70,8 @@ export default function Applications() {
     const appToUpdate = candidatesForEvents[Math.floor(Math.random() * candidatesForEvents.length)]
 
     if (appToUpdate.status === 'Saved' || appToUpdate.status === 'Applied') {
-      updateApplicationStatus(appToUpdate.id, 'Screening', `Recruiter from ${appToUpdate.company} initiated phone screen`)
-      setNotification(`🔔 Real-Time Sync: ${appToUpdate.company} HR moved your application to Screening!`)
+      updateApplicationStatus(appToUpdate.id, 'Screening', `Recruiter initiated candidate phone screen`)
+      setNotification(`🔔 Candidate Status Sync: ${appToUpdate.candidateName || 'Applicant'} moved to Screening!`)
     } else if (appToUpdate.status === 'Screening') {
       const newId = addInterview(appToUpdate.id, {
         round: 'Technical Interview',
@@ -75,13 +79,13 @@ export default function Applications() {
         time: '2:00 PM',
         type: 'Google Meet',
       })
-      setNotification(`📅 Real-Time Sync: ${appToUpdate.company} sent a Technical Interview invitation!`)
+      setNotification(`📅 Interview Scheduled: Invitation sent to ${appToUpdate.candidateName || 'Candidate'}!`)
     } else if (appToUpdate.status === 'Interview' || appToUpdate.status === 'Final Stage') {
       updateApplicationStatus(appToUpdate.id, 'Offer', `Official offer extended — KES 140,000/mo`)
-      setNotification(`🎉 Real-Time Sync: ${appToUpdate.company} extended an official Job Offer!`)
+      setNotification(`🎉 Job Offer Sent to ${appToUpdate.candidateName || 'Candidate'}!`)
     } else {
       updateApplicationStatus(appToUpdate.id, 'Interview', `Follow-up interview scheduled`)
-      setNotification(`🔔 Real-Time Sync: Status updated by ${appToUpdate.company}`)
+      setNotification(`🔔 Status updated by Employer`)
     }
 
     setTimeout(() => setNotification(null), 4500)
@@ -119,7 +123,7 @@ export default function Applications() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto animate-fadeIn relative">
-      {/* ── Toast Notification for Live Employer Sync ── */}
+      {/* ── Toast Notification ── */}
       {notification && (
         <div className="fixed top-6 right-6 z-50 p-4 rounded-xl shadow-2xl text-xs font-semibold text-white flex items-center gap-3 animate-celebrate bg-gradient-to-r from-violet-600 to-indigo-600 border border-violet-400">
           <Zap size={18} className="text-yellow-300 animate-pulse" />
@@ -131,11 +135,11 @@ export default function Applications() {
       <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold mb-1 flex items-center gap-2.5" style={{ color: 'var(--text-1)' }}>
-            {isRecruiter ? 'Recruiter Candidate Pipeline' : 'Application Journey & Tracker'}
+            {isRecruiter ? 'Employer Candidate Pipeline' : 'Application Journey & Tracker'}
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-4)' }}>
             {isRecruiter
-              ? `${applications.length} candidate applications across your verified listings`
+              ? `${applications.length} active candidates in your hiring pipeline`
               : `${applications.length} total applications saved & active in your recruitment pipeline`}
           </p>
         </div>
@@ -189,34 +193,46 @@ export default function Applications() {
 
       {/* ── Summary Stats Strip ── */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
-        {[
-          { label: 'Total Tracked', val: applications.length, icon: Send, color: '#3b82f6' },
-          { label: 'Saved Wishlist', val: savedCount, icon: Bookmark, color: '#a855f7' },
-          { label: 'Active Pipeline', val: activeCount, icon: Sparkles, color: 'var(--accent)' },
-          { label: 'Interviews', val: interviewCount, icon: CalendarClock, color: '#f59e0b' },
-          { label: 'Offers & Wins', val: offerCount, icon: Trophy, color: '#10b981' },
-        ].map(({ label, val, icon: Icon, color }) => (
+        {(isRecruiter
+          ? [
+              { label: 'Total Applicants', val: applications.length, icon: Users, color: '#3b82f6' },
+              { label: 'In Screening', val: screeningCount, icon: UserCheck, color: '#f59e0b' },
+              { label: 'In Interview', val: interviewCount, icon: CalendarClock, color: 'var(--accent)' },
+              { label: 'Offers Extended', val: offerCount, icon: Trophy, color: '#8b5cf6' },
+              { label: 'Hired Candidates', val: acceptedCount, icon: CheckCircle2, color: '#10b981' },
+            ]
+          : [
+              { label: 'Total Tracked', val: applications.length, icon: Send, color: '#3b82f6' },
+              { label: 'Saved Wishlist', val: savedCount, icon: Bookmark, color: '#a855f7' },
+              { label: 'Active Pipeline', val: activeCount, icon: Sparkles, color: 'var(--accent)' },
+              { label: 'Interviews', val: interviewCount, icon: CalendarClock, color: '#f59e0b' },
+              { label: 'Offers & Wins', val: offerCount, icon: Trophy, color: '#10b981' },
+            ]
+        ).map(({ label, val, icon: Icon, color }) => (
           <div
             key={label}
-            className="rounded-xl p-3.5 flex items-center gap-3 border transition-all"
+            className="p-4 rounded-xl border flex items-center gap-3 transition-all duration-200"
             style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}1f`, color }}>
-              <Icon size={15} strokeWidth={2} />
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: `${color}18`, color }}
+            >
+              <Icon size={18} />
             </div>
             <div>
-              <div className="font-display font-bold text-base leading-none" style={{ color: 'var(--text-1)' }}>{val}</div>
-              <div className="text-[11px] mt-0.5 font-medium" style={{ color: 'var(--text-4)' }}>{label}</div>
+              <div className="text-xl font-bold font-mono" style={{ color: 'var(--text-1)' }}>{val}</div>
+              <div className="text-[11px]" style={{ color: 'var(--text-4)' }}>{label}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── Automated Recruiter Sync & Response Simulator Banner ── */}
+      {/* ── Live Recruiter Sync Engine Banner ── */}
       <div
-        className="rounded-xl p-4 mb-6 border flex items-center justify-between gap-4 flex-wrap text-xs"
+        className="p-4 rounded-2xl mb-6 border flex items-center justify-between gap-4 text-xs flex-wrap"
         style={{
-          background: 'linear-gradient(90deg, rgba(124, 58, 237, 0.08), rgba(59, 130, 246, 0.08))',
+          background: 'rgba(124, 58, 237, 0.08)',
           borderColor: 'rgba(124, 58, 237, 0.25)',
         }}
       >
@@ -225,9 +241,13 @@ export default function Applications() {
             <Zap size={16} />
           </div>
           <div>
-            <strong style={{ color: 'var(--text-1)' }}>Automated Employer Sync & Real-Time Recruiter Engine:</strong>
+            <strong style={{ color: 'var(--text-1)' }}>
+              {isRecruiter ? 'Automated Applicant Sync & Review Engine:' : 'Automated Employer Sync & Real-Time Recruiter Engine:'}
+            </strong>
             <p className="mt-0.5" style={{ color: 'var(--text-4)' }}>
-              In production, status changes, interview calendar links, and offers are pushed automatically via ATS webhooks & recruiter dashboard updates.
+              {isRecruiter
+                ? 'Candidate ATS scores, resume text, and interview calendar slots sync instantly in real-time.'
+                : 'In production, status changes, interview calendar links, and offers are pushed automatically via ATS webhooks & recruiter dashboard updates.'}
             </p>
           </div>
         </div>
@@ -237,7 +257,7 @@ export default function Applications() {
           className="px-3.5 py-2 rounded-xl font-bold text-white press-scale flex items-center gap-1.5 shrink-0 shadow"
           style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}
         >
-          <RefreshCw size={13} className="animate-spin-slow" /> Test Live Employer Response
+          <RefreshCw size={13} className="animate-spin-slow" /> {isRecruiter ? 'Simulate Candidate Event' : 'Test Live Employer Response'}
         </button>
       </div>
 
@@ -247,7 +267,7 @@ export default function Applications() {
           <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-5)' }} />
           <input
             type="text"
-            placeholder="Search applications by company or job title..."
+            placeholder={isRecruiter ? 'Search by candidate name or target role...' : 'Search applications by company or job title...'}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl outline-none"
@@ -257,12 +277,19 @@ export default function Applications() {
 
         <div className="flex items-center gap-1.5">
           <Filter size={13} style={{ color: 'var(--text-5)' }} />
-          {[
-            { id: 'All', label: `All (${applications.length})` },
-            { id: 'Saved', label: `Saved (${savedCount})` },
-            { id: 'Active', label: `Active (${activeCount})` },
-            { id: 'Offers', label: `Offers (${offerCount})` },
-          ].map(btn => (
+          {(isRecruiter
+            ? [
+                { id: 'All', label: `All Candidates (${applications.length})` },
+                { id: 'Active', label: `Screening (${screeningCount})` },
+                { id: 'Offers', label: `Offers (${offerCount})` },
+              ]
+            : [
+                { id: 'All', label: `All (${applications.length})` },
+                { id: 'Saved', label: `Saved (${savedCount})` },
+                { id: 'Active', label: `Active (${activeCount})` },
+                { id: 'Offers', label: `Offers (${offerCount})` },
+              ]
+          ).map(btn => (
             <button
               key={btn.id}
               onClick={() => setStatusFilter(btn.id)}
@@ -285,17 +312,29 @@ export default function Applications() {
           <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-3)' }}>
             {search
               ? `No applications match "${search}"`
+              : isRecruiter
+              ? 'No candidate applications found in this category.'
               : statusFilter === 'Saved'
               ? 'No saved jobs in your wishlist. Go to Discover Jobs and click Save!'
               : 'No applications found in this category.'}
           </p>
-          <a
-            href="/jobs"
-            className="text-xs px-4 py-2.5 rounded-xl font-semibold text-white inline-flex items-center gap-1.5 press-scale"
-            style={{ background: 'var(--accent)' }}
-          >
-            Explore & Save Verified Opportunities <ArrowRight size={13} />
-          </a>
+          {isRecruiter ? (
+            <button
+              onClick={() => setShowPostJobModal(true)}
+              className="text-xs px-4 py-2.5 rounded-xl font-semibold text-white inline-flex items-center gap-1.5 press-scale"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
+            >
+              <Plus size={14} /> Post New Job to Receive Candidates
+            </button>
+          ) : (
+            <a
+              href="/jobs"
+              className="text-xs px-4 py-2.5 rounded-xl font-semibold text-white inline-flex items-center gap-1.5 press-scale"
+              style={{ background: 'var(--accent)' }}
+            >
+              Explore & Save Verified Opportunities <ArrowRight size={13} />
+            </a>
+          )}
         </div>
       ) : view === 'kanban' ? (
         <ApplicationKanban
@@ -321,82 +360,76 @@ export default function Applications() {
         />
       )}
 
-      {/* Post Job Modal */}
+      {/* Recruiter Post Job Modal */}
       {showPostJobModal && (
-        <Modal title="Post a Verified Job Opportunity" onClose={() => setShowPostJobModal(false)}>
-          <form onSubmit={handlePostJob} className="space-y-3">
+        <Modal title="Post a Verified Job Listing" onClose={() => setShowPostJobModal(false)}>
+          <form onSubmit={handlePostJob} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Job Title</label>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>Job Title</label>
               <input
                 type="text"
                 required
                 value={jobTitle}
                 onChange={e => setJobTitle(e.target.value)}
-                placeholder="e.g. Senior React Developer"
-                className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                placeholder="e.g. Senior Frontend Developer"
+                className="w-full px-3 py-2 text-sm rounded-xl outline-none"
                 style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
               />
             </div>
-
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Location</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>Location</label>
                 <input
                   type="text"
                   value={jobLocation}
                   onChange={e => setJobLocation(e.target.value)}
-                  placeholder="Nairobi / Remote"
-                  className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-xl outline-none"
                   style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Job Type</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>Job Type</label>
                 <select
                   value={jobType}
                   onChange={e => setJobType(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                  className="w-full px-3 py-2 text-sm rounded-xl outline-none"
                   style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
                 >
                   <option value="Full-time">Full-time</option>
-                  <option value="Internship">Internship</option>
+                  <option value="Part-time">Part-time</option>
                   <option value="Contract">Contract</option>
-                  <option value="Remote">Remote</option>
+                  <option value="Internship">Internship</option>
                 </select>
               </div>
             </div>
-
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Salary Range</label>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>Salary / Compensation</label>
               <input
                 type="text"
                 value={jobSalary}
                 onChange={e => setJobSalary(e.target.value)}
-                placeholder="e.g. KES 80,000 – 120,000/mo"
-                className="w-full px-3 py-2.5 text-sm rounded-xl outline-none"
+                className="w-full px-3 py-2 text-sm rounded-xl outline-none"
                 style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
               />
             </div>
-
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-4)' }}>Job Description & Requirements</label>
+              <label className="block text-xs font-medium mb-1" style={{ color: 'var(--text-3)' }}>Job Description & Responsibilities</label>
               <textarea
                 rows={4}
                 required
                 value={jobDesc}
                 onChange={e => setJobDesc(e.target.value)}
-                placeholder="Describe role responsibilities, key technologies, and qualifications..."
-                className="w-full px-3 py-2.5 text-sm rounded-xl outline-none resize-none"
+                placeholder="Describe role responsibilities, key skills required, and application requirements..."
+                className="w-full px-3 py-2 text-sm rounded-xl outline-none"
                 style={{ background: 'var(--input-bg)', border: '1px solid var(--border-1)', color: 'var(--text-1)' }}
               />
             </div>
-
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl font-semibold text-sm text-white press-scale"
+              className="w-full py-2.5 rounded-xl font-semibold text-sm text-white flex items-center justify-center gap-2 press-scale"
               style={{ background: 'linear-gradient(135deg, #7c3aed, #6d28d9)' }}
             >
-              Publish Listing with Anti-Scam Badge
+              <Plus size={16} /> Publish Verified Job
             </button>
           </form>
         </Modal>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   X, FileText, Star, MessageSquare, CheckCircle2, XCircle,
   Mic2, ChevronRight, Award, ClipboardCheck, User2, Phone,
@@ -57,7 +58,6 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
   const [isPlaying, setIsPlaying] = useState(false)
 
   const actions = nextActions(app.status)
-
   const [copiedCv, setCopiedCv] = useState(false)
 
   const handleDownloadCv = () => {
@@ -84,15 +84,15 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
     setTimeout(() => setCopiedCv(false), 2500)
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fadeIn"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fadeIn"
       style={{ background: 'rgba(8,14,31,0.85)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl border flex flex-col overflow-hidden animate-scaleIn"
-        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+        className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl border flex flex-col overflow-hidden animate-scaleIn my-auto shrink-0 shadow-2xl"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)', color: 'var(--text-1)' }}
         onClick={e => e.stopPropagation()}
       >
 
@@ -518,7 +518,8 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
