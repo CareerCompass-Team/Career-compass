@@ -16,9 +16,9 @@ function JobDiscovery() {
   );
 
   return (
-    <div>
-      <h1>CareerCompass</h1>
-      <h2>Discover Jobs</h2>
+    <div className="job-discovery">
+      <h1>Discover Jobs</h1>
+      <p>Find opportunities that match your career goals.</p>
 
       <SearchBar
         searchTerm={searchTerm}
@@ -29,7 +29,7 @@ function JobDiscovery() {
         setJobType={setJobType}
       />
 
-      <div>
+      <div className="job-list">
         {filteredJobs.map((job) => (
           <JobCard
             key={job.id}
