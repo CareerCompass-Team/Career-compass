@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import jobs from "../data/jobs";
 
 function JobDetails() {
   const { id } = useParams();
-
+  const [saved, setSaved] = useState(false);
   const job = jobs.find((job) => job.id === Number(id));
 
   return (
@@ -14,7 +15,9 @@ function JobDetails() {
       <p>{job.type}</p>
 
       <button>Apply</button>
-      <button>Save Job</button>
+      <button onClick={() => setSaved(!saved)}>
+        {saved ? "Saved" : "Save Job"}
+      </button>
     </div>
   );
 }
