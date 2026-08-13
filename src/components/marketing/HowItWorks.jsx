@@ -35,19 +35,13 @@ export default function HowItWorks() {
   const [headRef, headVisible] = useScrollReveal()
 
   return (
-    <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-20 border-t" style={{ borderColor: 'var(--border-1)' }}>
+    <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-16 border-t" style={{ borderColor: 'var(--border-2)' }}>
 
       {/* Header */}
-      <div ref={headRef} className={`text-center mb-14 reveal ${headVisible ? 'in-view' : ''}`}>
-        <div
-          className="inline-flex items-center gap-2 text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-4 border"
-          style={{ background: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.3)', color: '#60a5fa' }}
-        >
-          HOW IT WORKS
-        </div>
+      <div ref={headRef} className={`text-center mb-12 reveal ${headVisible ? 'in-view' : ''}`}>
         <h2
           className="font-display font-bold mb-3"
-          style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'var(--text-1)' }}
+          style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--text-1)' }}
         >
           From first search to signed offer.
         </h2>
@@ -58,37 +52,37 @@ export default function HowItWorks() {
 
       {/* Step cards */}
       <div className="grid md:grid-cols-3 gap-6 relative">
-        {STEPS.map(({ n, icon: Icon, title, body, color, bg, border }, i) => {
+        {STEPS.map(({ n, icon: Icon, title, body, color }, i) => {
           const [cardRef, cardVisible] = useScrollReveal() // eslint-disable-line react-hooks/rules-of-hooks
           return (
             <div
               key={n}
               ref={cardRef}
               className={`reveal ${cardVisible ? 'in-view' : ''}`}
-              style={{ transitionDelay: `${i * 150}ms` }}
+              style={{ transitionDelay: `${i * 120}ms` }}
             >
               <div
-                className="rounded-3xl p-6 border h-full group transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between"
-                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
+                className="rounded-2xl p-5 border h-full transition-all duration-200 flex flex-col justify-between"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-2)' }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = border
-                  e.currentTarget.style.boxShadow = `0 12px 35px ${bg}`
+                  e.currentTarget.style.borderColor = 'var(--border-1)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--border-1)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.borderColor = 'var(--border-2)'
+                  e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
                 <div>
                   {/* Step Icon Badge */}
-                  <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center justify-between mb-4">
                     <div
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                      style={{ background: bg, border: `1px solid ${border}`, color }}
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{ background: 'var(--accent-bg-faint)', color: 'var(--accent-text)' }}
                     >
-                      <Icon size={22} />
+                      <Icon size={20} />
                     </div>
-                    <span className="font-mono text-xs font-bold tracking-widest px-3 py-1 rounded-full border" style={{ background: 'rgba(8,14,31,0.6)', borderColor: border, color }}>
+                    <span className="font-mono text-[11px] font-medium px-2.5 py-0.5 rounded-full border" style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
                       STEP {n}
                     </span>
                   </div>
@@ -97,14 +91,14 @@ export default function HowItWorks() {
                   <p className="text-xs leading-relaxed mb-4" style={{ color: 'var(--text-4)' }}>{body}</p>
                 </div>
 
-                {/* Animated progress bar */}
-                <div className="mt-4 h-1 rounded-full overflow-hidden bg-gray-800">
+                {/* Subtle progress indicator */}
+                <div className="mt-2 h-1 rounded-full overflow-hidden bg-slate-800/50">
                   <div
-                    className="h-full rounded-full transition-all duration-1000"
+                    className="h-full rounded-full transition-all duration-700"
                     style={{
                       width: cardVisible ? '100%' : '0%',
-                      background: `linear-gradient(90deg, ${color}, transparent)`,
-                      transitionDelay: `${i * 150 + 300}ms`,
+                      background: 'var(--accent)',
+                      transitionDelay: `${i * 120 + 200}ms`,
                     }}
                   />
                 </div>

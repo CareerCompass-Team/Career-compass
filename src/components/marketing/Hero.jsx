@@ -13,34 +13,23 @@ function StatItem({ icon: Icon, value, label, subtext }) {
   return (
     <div
       ref={ref}
-      className="p-4 rounded-2xl border transition-all duration-300 hover:-translate-y-1 group text-center md:text-left flex flex-col md:flex-row items-center gap-3.5"
+      className="p-4 rounded-xl border flex flex-col md:flex-row items-center gap-3 text-center md:text-left"
       style={{
-        background: 'rgba(14,22,41,0.6)',
-        borderColor: 'var(--border-1)',
-        backdropFilter: 'blur(8px)',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)'
-        e.currentTarget.style.boxShadow = '0 12px 30px rgba(124,58,237,0.15)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'var(--border-1)'
-        e.currentTarget.style.boxShadow = 'none'
+        background: 'var(--bg-muted)',
+        borderColor: 'var(--border-2)',
       }}
     >
       <div
-        className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110"
-        style={{ background: 'var(--accent-bg)', color: 'var(--accent-text)' }}
+        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+        style={{ background: 'var(--accent-bg-faint)', color: 'var(--accent-text)' }}
       >
-        <Icon size={20} />
+        <Icon size={18} />
       </div>
       <div>
-        <div
-          className="font-display text-2xl font-bold tracking-tight gradient-text"
-        >
+        <div className="font-display text-xl font-bold tracking-tight gradient-text">
           {displayed}
         </div>
-        <div className="text-xs font-semibold" style={{ color: 'var(--text-2)' }}>{label}</div>
+        <div className="text-xs font-medium" style={{ color: 'var(--text-3)' }}>{label}</div>
         {subtext && <div className="text-[10px]" style={{ color: 'var(--text-5)' }}>{subtext}</div>}
       </div>
     </div>
@@ -61,35 +50,19 @@ function HeroInteractivePreview() {
 
   return (
     <div
-      className="animate-cardFloat w-full max-w-md rounded-3xl border p-5 relative overflow-hidden"
+      className="w-full max-w-md rounded-2xl border p-5 relative"
       style={{
-        background: 'rgba(14,22,41,0.88)',
-        borderColor: 'rgba(124,58,237,0.35)',
-        boxShadow: '0 30px 90px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,58,237,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-        backdropFilter: 'blur(16px)',
+        background: 'var(--bg-card)',
+        borderColor: 'var(--border-1)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
       }}
     >
-      {/* Glow orb inside card */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          top: -40,
-          right: -40,
-          width: 180,
-          height: 180,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%)',
-          pointerEvents: 'none',
-        }}
-      />
-
       {/* Header & Tab selector */}
       <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: 'var(--border-2)' }}>
         <div className="flex items-center gap-2">
           <div
             className="w-6 h-6 rounded-lg flex items-center justify-center text-white font-bold text-xs"
-            style={{ background: 'linear-gradient(135deg,#7c3aed,#3b82f6)' }}
+            style={{ background: 'var(--accent)' }}
           >
             ⚡
           </div>
@@ -100,10 +73,9 @@ function HeroInteractivePreview() {
         </div>
 
         <span
-          className="flex items-center gap-1.5 text-[10px] px-2.5 py-1 rounded-full font-semibold border"
-          style={{ background: 'rgba(16,185,129,0.15)', borderColor: 'rgba(16,185,129,0.3)', color: '#34d399' }}
+          className="text-[10px] px-2.5 py-1 rounded-full font-medium border"
+          style={{ background: 'var(--bg-muted)', borderColor: 'var(--border-2)', color: 'var(--text-4)' }}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
           Interactive Demo
         </span>
       </div>
@@ -265,32 +237,18 @@ export default function Hero() {
 
   return (
     <section className="relative bg-tech-grid pt-4" style={{ overflowX: 'hidden' }}>
-      {/* ── Background ambient mesh glows ── */}
+      {/* Subtle single glow — much calmer than two animated blobs */}
       <div
         aria-hidden
-        className="animate-blob"
         style={{
           position: 'absolute',
-          top: -120,
-          left: -80,
-          width: 550,
-          height: 550,
+          top: -60,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 600,
+          height: 300,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 68%)',
-          pointerEvents: 'none',
-        }}
-      />
-      <div
-        aria-hidden
-        className="animate-blob-delay"
-        style={{
-          position: 'absolute',
-          top: 80,
-          right: -100,
-          width: 500,
-          height: 500,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(59,130,246,0.18) 0%, transparent 68%)',
+          background: 'radial-gradient(ellipse, rgba(109,40,217,0.1) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -300,17 +258,16 @@ export default function Hero() {
 
         {/* Left column: Hero copy */}
         <div>
-          {/* Glowing Pill Announcement */}
+          {/* Quiet label pill — no pulse, no glow */}
           <div
-            className={`inline-flex items-center gap-2 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 border animate-glowPulse transition-all duration-700 ${titleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}
+            className={`inline-flex items-center gap-2 text-xs font-medium px-4 py-1.5 rounded-full mb-6 border transition-all duration-700 ${titleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'}`}
             style={{
-              background: 'rgba(124,58,237,0.12)',
-              borderColor: 'rgba(124,58,237,0.35)',
-              color: '#a78bfa',
+              background: 'var(--accent-bg-faint)',
+              borderColor: 'var(--border-1)',
+              color: 'var(--accent-text)',
               transitionDelay: '0ms',
             }}
           >
-            <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse inline-block" />
             Kenya's Smarter Career Platform · 100% Free Core Tools
           </div>
 
@@ -321,7 +278,7 @@ export default function Hero() {
           >
             Land your dream job{' '}
             <br />
-            <span className="animate-shimmer">faster & safer.</span>
+            <span style={{ color: 'var(--accent-light)' }}>faster & safer.</span>
           </h1>
 
           {/* Subheading */}
@@ -343,8 +300,8 @@ export default function Hero() {
               onClick={() => openAuthModal?.('signup')}
               className="text-sm px-8 py-3.5 rounded-xl font-bold text-white press-scale flex items-center gap-2"
               style={{
-                background: 'linear-gradient(135deg, #7c3aed, #6d28d9)',
-                boxShadow: '0 8px 30px rgba(124,58,237,0.5)',
+                background: 'var(--accent)',
+                boxShadow: '0 4px 16px rgba(124,58,237,0.3)',
               }}
             >
               Get Started Free <ArrowRight size={16} />
@@ -359,25 +316,13 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Feature Badges Array */}
+          {/* Simple trust line — replaces the 4 colourful pill badges */}
           <div
-            className={`flex items-center gap-3 flex-wrap transition-all duration-700 ${titleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-            style={{ transitionDelay: '320ms' }}
+            className={`flex items-center gap-2 text-xs transition-all duration-700 ${titleVisible ? 'opacity-100' : 'opacity-0'}`}
+            style={{ color: 'var(--text-4)', transitionDelay: '320ms' }}
           >
-            {[
-              { label: 'Anti-Scam Verified', color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
-              { label: 'AI Resume Scoring', color: '#a78bfa', bg: 'rgba(124,58,237,0.1)' },
-              { label: 'Visual Kanban Tracker', color: '#60a5fa', bg: 'rgba(59,130,246,0.1)' },
-              { label: 'Audio Mock Interview', color: '#fbbf24', bg: 'rgba(245,158,11,0.1)' },
-            ].map(pill => (
-              <span
-                key={pill.label}
-                className="text-xs font-semibold px-3 py-1.5 rounded-full border transition-all hover:scale-105"
-                style={{ background: pill.bg, borderColor: `${pill.color}35`, color: pill.color }}
-              >
-                ✓ {pill.label}
-              </span>
-            ))}
+            <ShieldCheck size={13} style={{ color: 'var(--accent-text)' }} />
+            Anti-scam verified · AI resume scoring · Mock interviews · Kanban tracker
           </div>
         </div>
 
@@ -393,14 +338,14 @@ export default function Hero() {
       {/* ── Stats Strip ── */}
       <div
         ref={statsRef}
-        className={`border-t border-b py-7 relative z-10 transition-all duration-700 ${statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-        style={{ borderColor: 'var(--border-1)', background: 'rgba(14,22,41,0.7)', backdropFilter: 'blur(12px)' }}
+        className={`border-t py-7 relative z-10 transition-all duration-700 ${statsVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        style={{ borderColor: 'var(--border-2)', background: 'var(--bg-card)' }}
       >
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatItem icon={ShieldCheck} value="12,400+" label="Verified Listings" subtext="100% KRA & PIN vetted" />
-          <StatItem icon={CheckCircle2} value="98%" label="Scam-Free Guarantee" subtext="Zero fake recruiters" />
-          <StatItem icon={Users} value="47,000+" label="Career Seekers" subtext="Students & graduates" />
-          <StatItem icon={TrendingUp} value="3.2×" label="Faster Placement" subtext="Average offer timeline" />
+          <StatItem icon={ShieldCheck} value="12,400+" label="Verified Listings" subtext="KRA & PIN vetted" />
+          <StatItem icon={CheckCircle2} value="98%" label="Scam-Free" subtext="Zero fake recruiters" />
+          <StatItem icon={Users} value="47,000+" label="Job Seekers" subtext="Students & graduates" />
+          <StatItem icon={TrendingUp} value="3.2×" label="Faster Placement" subtext="Avg. offer timeline" />
         </div>
       </div>
     </section>

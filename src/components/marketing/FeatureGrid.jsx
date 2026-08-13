@@ -103,21 +103,13 @@ export default function FeatureGrid() {
   return (
     <section id="features" className="max-w-6xl mx-auto px-6 py-20">
       {/* Section Header */}
-      <div ref={headRef} className={`text-center mb-14 reveal ${headVisible ? 'in-view' : ''}`}>
-        <div
-          className="inline-flex items-center gap-2 text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-4 border"
-          style={{ background: 'rgba(124,58,237,0.1)', borderColor: 'rgba(124,58,237,0.3)', color: '#a78bfa' }}
-        >
-          POWERFUL SUITE
-        </div>
+      <div ref={headRef} className={`text-center mb-12 reveal ${headVisible ? 'in-view' : ''}`}>
         <h2
           className="font-display font-bold mb-3"
-          style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'var(--text-1)' }}
+          style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--text-1)' }}
         >
           Everything you need.{' '}
-          <span className="gradient-text">
-            Nothing you don't.
-          </span>
+          <span className="gradient-text">Nothing you don't.</span>
         </h2>
         <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--text-4)' }}>
           Built specifically for job seekers and recruiters across Kenya and Africa.
@@ -136,25 +128,23 @@ export default function FeatureGrid() {
               style={{ transitionDelay: `${(i % 3) * 120}ms` }}
             >
               <div
-                className="rounded-3xl p-6 border h-full group transition-all duration-300 flex flex-col justify-between"
-                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
+                className="rounded-2xl p-5 border h-full transition-all duration-200 flex flex-col justify-between"
+                style={{ background: 'var(--bg-card)', borderColor: 'var(--border-2)' }}
                 onMouseEnter={e => {
-                  e.currentTarget.style.borderColor = 'rgba(124,58,237,0.45)'
-                  e.currentTarget.style.boxShadow = `0 14px 45px ${glow}`
-                  e.currentTarget.style.transform = 'translateY(-6px)'
+                  e.currentTarget.style.borderColor = 'var(--border-1)'
+                  e.currentTarget.style.transform = 'translateY(-3px)'
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.borderColor = 'var(--border-1)'
-                  e.currentTarget.style.boxShadow = 'none'
+                  e.currentTarget.style.borderColor = 'var(--border-2)'
                   e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
                 <div>
                   <div
-                    className="w-13 h-13 w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
-                    style={{ background: gradient, boxShadow: `0 6px 20px ${glow}` }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: gradient }}
                   >
-                    <Icon size={22} color="white" strokeWidth={2} />
+                    <Icon size={20} color="white" strokeWidth={2} />
                   </div>
 
                   <h3 className="text-base font-bold mb-2" style={{ color: 'var(--text-1)' }}>{title}</h3>

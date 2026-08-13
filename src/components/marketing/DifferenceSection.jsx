@@ -32,15 +32,9 @@ export default function DifferenceSection() {
   ]
 
   return (
-    <section className="max-w-6xl mx-auto px-6 py-20">
-      <div className="text-center mb-14">
-        <div
-          className="inline-flex items-center gap-2 text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-4 border"
-          style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.3)', color: '#10b981' }}
-        >
-          WHY CAREERCOMPASS
-        </div>
-        <h2 className="font-display font-bold mb-3" style={{ fontSize: 'clamp(2rem, 3.5vw, 2.7rem)', color: 'var(--text-1)' }}>
+    <section className="max-w-6xl mx-auto px-6 py-16">
+      <div className="text-center mb-10">
+        <h2 className="font-display font-bold mb-3" style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--text-1)' }}>
           Built different. On purpose.
         </h2>
         <p className="text-sm max-w-lg mx-auto" style={{ color: 'var(--text-4)' }}>
@@ -50,8 +44,8 @@ export default function DifferenceSection() {
 
       {/* Comparison Matrix Table */}
       <div
-        className="rounded-3xl border overflow-hidden p-6 md:p-8"
-        style={{ background: 'rgba(14,22,41,0.85)', borderColor: 'rgba(124,58,237,0.3)', backdropFilter: 'blur(16px)' }}
+        className="rounded-2xl border overflow-hidden p-6 md:p-8"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-2)' }}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b text-xs font-bold uppercase tracking-wider" style={{ borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
           <div>Feature</div>

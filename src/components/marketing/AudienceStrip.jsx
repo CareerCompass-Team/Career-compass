@@ -55,18 +55,12 @@ export default function AudienceStrip() {
   return (
     <>
       {/* ── Audience Cards Section ── */}
-      <section id="for-students" className="max-w-6xl mx-auto px-6 py-20" ref={sectionRef}>
+      <section id="for-students" className="max-w-6xl mx-auto px-6 py-16" ref={sectionRef}>
         {/* Header */}
-        <div className={`mb-12 reveal ${sectionVisible ? 'in-view' : ''}`}>
-          <div
-            className="inline-flex items-center gap-2 text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-4 border"
-            style={{ background: 'rgba(124,58,237,0.1)', borderColor: 'rgba(124,58,237,0.3)', color: '#a78bfa' }}
-          >
-            WHO IT'S TAILORED FOR
-          </div>
+        <div className={`mb-10 reveal ${sectionVisible ? 'in-view' : ''}`}>
           <h2
             className="font-display font-bold mb-3"
-            style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'var(--text-1)' }}
+            style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--text-1)' }}
           >
             Built for where you're starting from.
           </h2>
@@ -77,30 +71,28 @@ export default function AudienceStrip() {
 
         {/* 3 Interactive Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {AUDIENCES.map(({ id, icon: Icon, title, body, gradient, glow }, i) => {
+          {AUDIENCES.map(({ id, icon: Icon, title, body }, i) => {
             const isSelected = selectedPersona === id
             return (
               <div
                 key={title}
                 className={`reveal ${sectionVisible ? 'in-view' : ''}`}
-                style={{ transitionDelay: `${i * 120}ms` }}
+                style={{ transitionDelay: `${i * 100}ms` }}
               >
                 <div
                   onClick={() => setSelectedPersona(id)}
-                  className="rounded-3xl p-6 border h-full group cursor-pointer transition-all duration-300 relative overflow-hidden"
+                  className="rounded-2xl p-5 border h-full cursor-pointer transition-all duration-200"
                   style={{
-                    background: isSelected ? 'rgba(14,22,41,0.95)' : 'var(--bg-card)',
-                    borderColor: isSelected ? 'rgba(124,58,237,0.5)' : 'var(--border-1)',
-                    boxShadow: isSelected ? `0 12px 40px ${glow}` : 'none',
-                    transform: isSelected ? 'translateY(-4px)' : 'translateY(0)',
+                    background: isSelected ? 'var(--bg-muted)' : 'var(--bg-card)',
+                    borderColor: isSelected ? 'var(--accent)' : 'var(--border-2)',
                   }}
                 >
                   {/* Icon */}
                   <div
-                    className="w-13 h-13 w-12 h-12 rounded-2xl flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110"
-                    style={{ background: gradient, boxShadow: `0 6px 20px ${glow}` }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: isSelected ? 'var(--accent)' : 'var(--accent-bg-faint)', color: isSelected ? '#ffffff' : 'var(--accent-text)' }}
                   >
-                    <Icon size={22} color="white" strokeWidth={2} />
+                    <Icon size={20} />
                   </div>
 
                   <h3 className="text-base font-bold mb-2 flex items-center justify-between" style={{ color: 'var(--text-1)' }}>
@@ -113,9 +105,9 @@ export default function AudienceStrip() {
 
                   <div
                     className="text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                    style={{ color: isSelected ? '#a78bfa' : 'var(--text-5)' }}
+                    style={{ color: isSelected ? 'var(--accent-text)' : 'var(--text-5)' }}
                   >
-                    View Sample Roles <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                    View Sample Roles <ArrowRight size={13} />
                   </div>
                 </div>
               </div>
@@ -125,10 +117,10 @@ export default function AudienceStrip() {
 
         {/* Dynamic Sample Roles Interactive Banner */}
         <div
-          className="p-6 rounded-3xl border animate-fadeIn"
+          className="p-5 rounded-2xl border"
           style={{
-            background: 'linear-gradient(135deg, rgba(14,22,41,0.9) 0%, rgba(8,14,31,0.95) 100%)',
-            borderColor: 'rgba(124,58,237,0.25)',
+            background: 'var(--bg-card)',
+            borderColor: 'var(--border-2)',
           }}
         >
           <div className="flex items-center justify-between mb-4 border-b pb-3" style={{ borderColor: 'var(--border-2)' }}>
@@ -136,7 +128,7 @@ export default function AudienceStrip() {
               <Building2 size={15} className="text-purple-400" />
               <span>Sample Verified Listings for <strong className="text-purple-300">{activeAudience.title}</strong></span>
             </div>
-            <span className="text-[10px] px-2.5 py-1 rounded-full font-mono font-bold" style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399' }}>
+            <span className="text-[10px] px-2.5 py-1 rounded-full font-mono font-medium" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}>
               ✓ KRA Verified
             </span>
           </div>
