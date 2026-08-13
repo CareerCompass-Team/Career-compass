@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   ShieldCheck, Plus, Users, Briefcase, Calendar, ArrowRight,
   Inbox, ClipboardList, Mic2, Gift, Trophy, Ban, Eye, Star,
@@ -39,7 +40,8 @@ function ScoreBadge({ score }) {
 }
 
 export default function RecruiterDashboard() {
-  const { user, postVerifiedJob } = useAppData()
+  const navigate = useNavigate()
+  const { user, postVerifiedJob, scheduleCandidateInterview } = useAppData()
 
   const [candidates, setCandidates] = useState(RECRUITER_CANDIDATES)
   const [listings, setListings] = useState(RECRUITER_LISTINGS)
@@ -92,6 +94,12 @@ export default function RecruiterDashboard() {
   const handleSchedule = (e) => {
     e.preventDefault()
     if (!candidateForSchedule || !meetingDate || !meetingTime) return
+    scheduleCandidateInterview(candidateForSchedule.id, {
+      round: meetingRound,
+      date: meetingDate,
+      time: meetingTime,
+      meetingLink: meetingLink,
+    })
     setCandidates(prev => prev.map(c =>
       c.id === candidateForSchedule.id
         ? { ...c, interviewDate: meetingDate, interviewTime: meetingTime, meetLink: meetingLink, stage: 'Interview', timeline: [...c.timeline, { date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), event: `${meetingRound} scheduled for ${meetingDate} at ${meetingTime}` }] }
@@ -195,19 +203,19 @@ export default function RecruiterDashboard() {
       {/* ── Metric Cards ── */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
-          { label: 'Active Listings', value: activeListings, Icon: Briefcase, color: '#7c3aed', bg: 'rgba(124,58,237,0.12)', tab: 'listings' },
-          { label: 'Total Applicants', value: totalCandidates, Icon: Users, color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', tab: 'pipeline' },
-          { label: 'In Active Pipeline', value: inPipeline, Icon: ArrowRight, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', tab: 'pipeline' },
-          { label: 'Offers Accepted', value: hired, Icon: Trophy, color: '#10b981', bg: 'rgba(16,185,129,0.12)', tab: 'pipeline' },
-          { label: 'Avg ATS Match', value: `${avgAts}%`, Icon: BarChart3, color: '#ec4899', bg: 'rgba(236,72,153,0.12)', tab: 'pipeline' },
-        ].map(({ label, value, Icon, color, bg, tab }) => (
+          { label: 'Active Listings', value: activeListings, Icon: Briefcase, color: '#7c3aed', bg: 'rgba(124,58,237,0.12)', path: '/jobs', tab: 'listings' },
+          { label: 'Total Applicants', value: totalCandidates, Icon: Users, color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', path: '/applications', tab: 'pipeline' },
+          { label: 'In Active Pipeline', value: inPipeline, Icon: ArrowRight, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', path: '/applications', tab: 'pipeline' },
+          { label: 'Offers Accepted', value: hired, Icon: Trophy, color: '#10b981', bg: 'rgba(16,185,129,0.12)', path: '/applications', tab: 'pipeline' },
+          { label: 'Avg ATS Match', value: `${avgAts}%`, Icon: BarChart3, color: '#ec4899', bg: 'rgba(236,72,153,0.12)', path: '/applications', tab: 'pipeline' },
+        ].map(({ label, value, Icon, color, bg, path }) => (
           <div
             key={label}
-            onClick={() => setActiveTab(tab)}
-            className="p-4 rounded-xl border flex items-center gap-3 cursor-pointer transition-all hover:border-purple-500/40 press-scale"
+            onClick={() => navigate(path)}
+            className="p-4 rounded-xl border flex items-center gap-3 cursor-pointer transition-all hover:border-purple-500/40 hover:shadow-md press-scale group"
             style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}
           >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: bg, color }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform" style={{ background: bg, color }}>
               <Icon size={18} />
             </div>
             <div>

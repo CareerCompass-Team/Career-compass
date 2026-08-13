@@ -1,7 +1,5 @@
 // src/data/recruiterMockData.js
-// Simulated candidates and listings for the Recruiter Portal (Option A)
-// These are entirely separate from job-seeker application state.
-
+// Simulated candidates and listings for the Recruiter Portal
 export const RECRUITER_LISTINGS = [
   {
     id: 'rl1',
@@ -175,8 +173,6 @@ export const RECRUITER_CANDIDATES = [
     interviewTime: '2:00 PM',
     meetLink: 'https://meet.google.com/career-compass-jemimah',
   },
-
-  // ── rl2: Software Engineering Intern ───────────────────────────────
   {
     id: 'rc6',
     listingId: 'rl2',
@@ -222,8 +218,6 @@ export const RECRUITER_CANDIDATES = [
     phone: '+254 700 777 888',
     email: 'grace.wanjiku@students.uon.ac.ke',
   },
-
-  // ── rl3: UX/UI Design Intern ───────────────────────────────────────
   {
     id: 'rc8',
     listingId: 'rl3',
@@ -253,3 +247,32 @@ export const RECRUITER_CANDIDATES = [
     meetLink: 'https://meet.google.com/career-compass-nasrin',
   },
 ]
+
+// Convert recruiter candidates to standard application objects
+export const RECRUITER_APPLICATIONS_MOCK = RECRUITER_CANDIDATES.map(c => {
+  const listing = RECRUITER_LISTINGS.find(l => l.id === c.listingId)
+  return {
+    id: c.id,
+    jobId: c.listingId,
+    company: 'Safaricom',
+    role: listing ? listing.title : 'Software Role',
+    location: c.location ? `${c.location}, Kenya` : 'Nairobi, Kenya',
+    appliedDate: c.appliedDate || 'Aug 5, 2026',
+    status: c.stage || 'Applied',
+    matchScore: c.atsScore || 85,
+    candidateName: c.name,
+    candidateEmail: c.email,
+    candidatePhone: c.phone,
+    candidateCourse: c.course,
+    candidateUniversity: c.university,
+    cvFile: c.cvFile,
+    coverLetter: c.coverLetter,
+    matchedSkills: c.matchedSkills || [],
+    missingSkills: c.missingSkills || [],
+    notes: c.notes || '',
+    interviewDate: c.interviewDate || null,
+    interviewTime: c.interviewTime || null,
+    meetLink: c.meetLink || null,
+    timeline: c.timeline || [{ date: c.appliedDate || 'Aug 5', event: 'Application submitted' }],
+  }
+})

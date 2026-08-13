@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import * as mock from '../data/mockData'
+import { RECRUITER_APPLICATIONS_MOCK } from '../data/recruiterMockData'
 import { fetchLiveJobs } from '../Services/jobApi'
 
 const AppDataContext = createContext(null)
@@ -64,8 +65,8 @@ function emptyUserData() {
   }
 }
 
-function loadDataForUser(email) {
-  if (!email) return mockDefaults()
+function loadDataForUser(email, role = 'candidate') {
+  if (!email) return role === 'recruiter' ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK } : mockDefaults()
   const isMockUser = email === mock.profile?.email
   try {
     const raw = localStorage.getItem(dataKey(email))
@@ -73,7 +74,9 @@ function loadDataForUser(email) {
       const parsed = JSON.parse(raw)
       return {
         jobs: Array.isArray(parsed.jobs) ? parsed.jobs : isMockUser ? mockDefaults().jobs : emptyUserData().jobs,
-        applications: Array.isArray(parsed.applications) ? parsed.applications : isMockUser ? mock.applications : [],
+        applications: Array.isArray(parsed.applications) && parsed.applications.length > 0
+          ? parsed.applications
+          : role === 'recruiter' ? RECRUITER_APPLICATIONS_MOCK : (isMockUser ? mock.applications : []),
         interviews: Array.isArray(parsed.interviews) ? parsed.interviews : isMockUser ? mock.interviews : [],
         resumes: Array.isArray(parsed.resumes) ? parsed.resumes : isMockUser ? mock.resumes : [],
         profile: parsed.profile || (isMockUser ? mock.profile : {}),
@@ -82,7 +85,9 @@ function loadDataForUser(email) {
   } catch {
     // fall through
   }
-  return isMockUser ? mockDefaults() : emptyUserData()
+  return role === 'recruiter'
+    ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK }
+    : (isMockUser ? mockDefaults() : emptyUserData())
 }
 
 function today() {
@@ -436,6 +441,76 @@ export function AppDataProvider({ children }) {
     return newInterview.id
   }
 
+  // ---- Recruiter Schedule Interview for Candidate ----
+  const scheduleCandidateInterview = (candidateId, { round, date, time, meetingLink }) => {
+    const app = data.applications.find(a => a.id === candidateId)
+    const company = app ? app.company : (user?.companyName || 'Safaricom')
+    const role = app ? app.role : 'Engineering Role'
+    const candidateName = app ? (app.candidateName || app.role) : 'Candidate'
+
+    const newInterview = {
+      id: uid('i'),
+      applicationId: candidateId,
+      company,
+      role,
+      candidateName,
+      date: date || today(),
+      time: time || '10:00 AM',
+      round: round || 'Technical Interview',
+      type: 'Google Meet',
+      status: 'Upcoming',
+      meetingLink: meetingLink || 'https://meet.google.com/career-compass-interview',
+      interviewers: ['Recruiter / Hiring Manager'],
+      prepNotes: [
+        { id: uid('p'), text: `Review ${candidateName}'s CV and project portfolio`, checked: false },
+        { id: uid('p'), text: 'Prepare technical questions & coding exercise', checked: false },
+        { id: uid('p'), text: 'Send calendar invite to candidate', checked: true },
+      ],
+      questions: [],
+      notes: `Scheduled ${round || 'Interview'} for ${candidateName} on ${date} at ${time}. Candidate notified via email.`,
+      selfAssessment: { technical: 0, communication: 0, confidence: 0 },
+      result: 'Waiting',
+    }
+
+    setData(d => ({
+      ...d,
+      interviews: [newInterview, ...d.interviews],
+      applications: d.applications.map(a =>
+        a.id === candidateId
+          ? {
+              ...a,
+              status: 'Interview',
+              interviewDate: date,
+              interviewTime: time,
+              meetLink: meetingLink,
+              timeline: [...a.timeline, { date: today(), event: `${round || 'Interview'} scheduled for ${date} at ${time}` }],
+            }
+          : a
+      ),
+    }))
+    return newInterview.id
+  }
+
+  // ---- Recruiter Send Offer to Candidate ----
+  const sendCandidateOffer = (candidateId, offerData) => {
+    setData(d => ({
+      ...d,
+      applications: d.applications.map(a =>
+        a.id === candidateId
+          ? {
+              ...a,
+              status: 'Offer',
+              offerSalary: offerData.salary || 'KES 100,000/mo',
+              offerStartDate: offerData.startDate || 'Sep 1, 2026',
+              offerBenefits: offerData.benefits || 'Medical cover, Remote Fridays, KES 50,000 learning budget',
+              offerLetter: offerData.letter || '',
+              timeline: [...a.timeline, { date: today(), event: `Official Job Offer letter extended (${offerData.salary || 'Competitive'})` }],
+            }
+          : a
+      ),
+    }))
+  }
+
   const togglePrepNote = (interviewId, prepNoteId) => {
     setData(d => ({
       ...d,
@@ -551,6 +626,8 @@ export function AppDataProvider({ children }) {
     addApplicationNote,
     setApplicationNextStep,
     addInterview,
+    scheduleCandidateInterview,
+    sendCandidateOffer,
     togglePrepNote,
     updateInterviewNotes,
     setSelfAssessment,
