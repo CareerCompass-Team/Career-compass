@@ -112,17 +112,10 @@ export default function FeatureGrid() {
         </div>
         <h2
           className="font-display font-bold mb-3"
-          style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', color: 'var(--text-1)' }}
+          style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: 'var(--text-1)' }}
         >
           Everything you need.{' '}
-          <span
-            style={{
-              background: 'linear-gradient(135deg,#7c3aed,#3b82f6)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
+          <span className="gradient-text">
             Nothing you don't.
           </span>
         </h2>

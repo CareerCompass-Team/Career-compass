@@ -31,7 +31,7 @@ export default function Footer() {
   return (
     <footer
       className="border-t"
-      style={{ borderColor: 'var(--border-1)', background: 'rgba(6,9,26,0.95)' }}
+      style={{ borderColor: 'var(--border-1)', background: 'rgba(8,16,46,0.98)' }}
     >
       <div className="max-w-6xl mx-auto px-6 py-14">
         {/* Top row: Brand + Links grid */}

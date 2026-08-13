@@ -10,8 +10,8 @@ export default function PublicNav() {
     <header
       className="sticky top-0 z-[100] backdrop-blur-xl transition-all"
       style={{
-        background: 'rgba(8,14,31,0.85)',
-        borderBottom: '1px solid var(--border-3)',
+        background: 'rgba(8,16,46,0.88)',
+        borderBottom: '1px solid var(--border-2)',
       }}
     >
       <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">

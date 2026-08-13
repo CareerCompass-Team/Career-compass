@@ -36,13 +36,7 @@ function StatItem({ icon: Icon, value, label, subtext }) {
       </div>
       <div>
         <div
-          className="font-display text-2xl font-bold tracking-tight"
-          style={{
-            background: 'linear-gradient(135deg, #a78bfa, #60a5fa)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}
+          className="font-display text-2xl font-bold tracking-tight gradient-text"
         >
           {displayed}
         </div>
@@ -270,7 +264,7 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden bg-tech-grid pt-4">
+    <section className="relative bg-tech-grid pt-4" style={{ overflowX: 'hidden' }}>
       {/* ── Background ambient mesh glows ── */}
       <div
         aria-hidden
@@ -323,9 +317,9 @@ export default function Hero() {
           {/* Title */}
           <h1
             className={`font-display font-bold leading-[1.06] mb-5 transition-all duration-700 ${titleVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-            style={{ fontSize: 'clamp(2.4rem, 5.2vw, 3.8rem)', transitionDelay: '80ms' }}
+            style={{ fontSize: 'clamp(2rem, 5vw, 3.4rem)', transitionDelay: '80ms', color: 'var(--text-1)' }}
           >
-            <span style={{ color: 'var(--text-1)' }}>Land your dream job </span>
+            Land your dream job{' '}
             <br />
             <span className="animate-shimmer">faster & safer.</span>
           </h1>

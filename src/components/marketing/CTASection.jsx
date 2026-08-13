@@ -58,17 +58,10 @@ export default function CTASection() {
 
           <h2
             className="font-display font-bold mb-4 relative z-10"
-            style={{ fontSize: 'clamp(2rem, 4.5vw, 3.2rem)', color: 'var(--text-1)' }}
+            style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', color: 'var(--text-1)' }}
           >
             Your next career move{' '}
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #7c3aed, #3b82f6, #06b6d4)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="gradient-text">
               starts here.
             </span>
           </h2>
