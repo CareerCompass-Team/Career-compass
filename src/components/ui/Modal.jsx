@@ -1,4 +1,4 @@
-import { createPortal } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 export default function Modal({ title, onClose, children, width = 460 }) {
