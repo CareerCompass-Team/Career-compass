@@ -261,11 +261,16 @@ export default function Interviews() {
                   <div className="flex items-start gap-4">
                     <CompanyAvatar name={iv.company} size="lg" />
                     <div>
-                      <div className="text-base font-bold flex items-center gap-2 mb-1" style={{ color: 'var(--text-1)' }}>
+                      <div className="text-base font-bold flex items-center gap-2 mb-1 flex-wrap" style={{ color: 'var(--text-1)' }}>
                         <span>{iv.role}</span>
                         <span className="text-xs px-2.5 py-0.5 rounded-md font-semibold" style={{ background: 'var(--accent-bg-subtle)', color: 'var(--accent-text)' }}>
                           {iv.company}
                         </span>
+                        {isRecruiter && iv.candidateName && (
+                          <span className="text-xs px-2.5 py-0.5 rounded-full font-bold" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}>
+                            👤 {iv.candidateName}
+                          </span>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-3 text-xs flex-wrap" style={{ color: 'var(--text-4)' }}>

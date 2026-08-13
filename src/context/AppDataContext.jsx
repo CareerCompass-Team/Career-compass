@@ -65,9 +65,80 @@ function emptyUserData() {
   }
 }
 
+const RECRUITER_INTERVIEWS_MOCK = [
+  {
+    id: 'iv-rec-1',
+    applicationId: 'rc3',
+    company: 'Safaricom',
+    role: 'Software Engineering Intern',
+    candidateName: 'David Kamau',
+    candidateEmail: 'david.kamau@usiu.ac.ke',
+    date: 'Aug 16, 2026',
+    time: '10:00 AM',
+    round: 'Technical Interview',
+    type: 'Google Meet',
+    status: 'Upcoming',
+    meetingLink: 'https://meet.google.com/career-compass-david',
+    interviewers: ['Engineering Lead', 'Hiring Manager'],
+    prepNotes: [
+      { id: 'p1', text: "Review David's GitHub portfolio and coding submission", checked: true },
+      { id: 'p2', text: 'Prepare React architecture and state management questions', checked: false },
+    ],
+    questions: [],
+    notes: 'Top candidate from ATS screen (94% match).',
+  },
+  {
+    id: 'iv-rec-2',
+    applicationId: 'rc8',
+    company: 'Safaricom',
+    role: 'UX/UI Design Intern',
+    candidateName: 'Nasrin Mohamed',
+    candidateEmail: 'nasrin.m@strathmore.edu',
+    date: 'Aug 17, 2026',
+    time: '11:00 AM',
+    round: 'Portfolio & Design Challenge Review',
+    type: 'Google Meet',
+    status: 'Upcoming',
+    meetingLink: 'https://meet.google.com/career-compass-nasrin',
+    interviewers: ['Product Design Lead'],
+    prepNotes: [
+      { id: 'p1', text: 'Review Figma interactive prototype submission', checked: true },
+    ],
+    questions: [],
+    notes: 'Outstanding portfolio. High potential for internship.',
+  },
+  {
+    id: 'iv-rec-3',
+    applicationId: 'rc5',
+    company: 'Safaricom',
+    role: 'Frontend Developer Intern',
+    candidateName: 'Jemimah Achieng',
+    candidateEmail: 'jemimah.a@tuk.ac.ke',
+    date: 'Aug 14, 2026',
+    time: '2:00 PM',
+    round: 'Technical Interview',
+    type: 'Google Meet',
+    status: 'Completed',
+    meetingLink: 'https://meet.google.com/career-compass-jemimah',
+    interviewers: ['Engineering Lead'],
+    prepNotes: [
+      { id: 'p1', text: 'Completed with score 96/100', checked: true },
+    ],
+    questions: [],
+    notes: 'Scored 96/100. Recommended for offer.',
+  },
+]
+
 function loadDataForUser(email, role = 'candidate') {
-  if (!email) return role === 'recruiter' ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK } : mockDefaults()
+  const isRecruiter = role === 'recruiter'
   const isMockUser = email === mock.profile?.email
+
+  if (!email) {
+    return isRecruiter
+      ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK, interviews: RECRUITER_INTERVIEWS_MOCK }
+      : mockDefaults()
+  }
+
   try {
     const raw = localStorage.getItem(dataKey(email))
     if (raw) {
@@ -76,8 +147,10 @@ function loadDataForUser(email, role = 'candidate') {
         jobs: Array.isArray(parsed.jobs) ? parsed.jobs : isMockUser ? mockDefaults().jobs : emptyUserData().jobs,
         applications: Array.isArray(parsed.applications) && parsed.applications.length > 0
           ? parsed.applications
-          : role === 'recruiter' ? RECRUITER_APPLICATIONS_MOCK : (isMockUser ? mock.applications : []),
-        interviews: Array.isArray(parsed.interviews) ? parsed.interviews : isMockUser ? mock.interviews : [],
+          : isRecruiter ? RECRUITER_APPLICATIONS_MOCK : (isMockUser ? mock.applications : []),
+        interviews: Array.isArray(parsed.interviews) && parsed.interviews.length > 0
+          ? parsed.interviews
+          : isRecruiter ? RECRUITER_INTERVIEWS_MOCK : (isMockUser ? mock.interviews : []),
         resumes: Array.isArray(parsed.resumes) ? parsed.resumes : isMockUser ? mock.resumes : [],
         profile: parsed.profile || (isMockUser ? mock.profile : {}),
       }
@@ -85,8 +158,9 @@ function loadDataForUser(email, role = 'candidate') {
   } catch {
     // fall through
   }
-  return role === 'recruiter'
-    ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK }
+
+  return isRecruiter
+    ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK, interviews: RECRUITER_INTERVIEWS_MOCK }
     : (isMockUser ? mockDefaults() : emptyUserData())
 }
 
@@ -100,7 +174,7 @@ function uid(prefix) {
 
 export function AppDataProvider({ children }) {
   const initialUser = getInitialUser()
-  const [data, setData] = useState(() => loadDataForUser(initialUser.email))
+  const [data, setData] = useState(() => loadDataForUser(initialUser.email, initialUser.role))
   const [user, setUser] = useState(initialUser)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
@@ -175,7 +249,7 @@ export function AppDataProvider({ children }) {
     }
     setUser(restoredUser)
     // Load that user's own data bucket
-    setData(loadDataForUser(email))
+    setData(loadDataForUser(email, role))
     setAuthModalOpen(false)
   }
 
@@ -200,8 +274,8 @@ export function AppDataProvider({ children }) {
       experienceLevel: role === 'recruiter' ? 'Hiring Manager' : experienceLevel,
     }
     setUser(newUser)
-    // Brand-new account → start with a clean slate
-    setData(emptyUserData())
+    // Brand-new account → initialize with recruiter defaults or empty candidate slate
+    setData(role === 'recruiter' ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK, interviews: RECRUITER_INTERVIEWS_MOCK } : emptyUserData())
     setAuthModalOpen(false)
   }
 

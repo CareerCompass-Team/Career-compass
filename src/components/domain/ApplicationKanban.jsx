@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import {
   Bookmark, Send, Search, CalendarClock, Sparkles,
   Trophy, CheckCircle2, XCircle, ArrowRight, Video, ChevronRight, Clock,
+  GraduationCap, Star,
 } from 'lucide-react'
 import CompanyAvatar from '../ui/CompanyAvatar'
 import EmptyState from '../ui/EmptyState'
@@ -18,7 +19,24 @@ const STATUS_ICONS = {
   'Not Selected': XCircle,
 }
 
+// Initials avatar for candidates
+function CandidateAvatar({ name = '' }) {
+  const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+  const colors = ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#6366f1']
+  const color = colors[name.charCodeAt(0) % colors.length]
+  return (
+    <div
+      className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+      style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}
+    >
+      {initials || 'C'}
+    </div>
+  )
+}
+
 export default function ApplicationKanban({ applications, onCardClick, onAdvanceStatus }) {
+  const isRecruiter = !!onCardClick
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-6 pt-1 select-none">
       {APPLICATION_STATUSES.map((status, colIdx) => {
@@ -66,10 +84,55 @@ export default function ApplicationKanban({ applications, onCardClick, onAdvance
                 const isSaved = app.status === 'Saved'
                 const isOffer = app.status === 'Offer'
                 const isInterview = app.status === 'Interview'
+                const atsScore = app.matchScore
+                const atsColor = atsScore >= 90 ? '#10b981' : atsScore >= 75 ? '#f59e0b' : '#ef4444'
 
-                const cardBody = (
+                // ── Recruiter candidate card ──────────────────────────
+                const recruiterCardBody = (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <CandidateAvatar name={app.candidateName || app.role} />
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold truncate" style={{ color: 'var(--text-1)' }}>
+                            {app.candidateName || 'Candidate'}
+                          </div>
+                          <div className="text-[11px] truncate" style={{ color: 'var(--accent-text)' }}>
+                            {app.role}
+                          </div>
+                        </div>
+                      </div>
+                      {atsScore && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0" style={{ background: `${atsColor}20`, color: atsColor }}>
+                          {atsScore}%
+                        </span>
+                      )}
+                    </div>
+
+                    {app.candidateUniversity && (
+                      <div className="flex items-center gap-1 text-[10px]" style={{ color: 'var(--text-5)' }}>
+                        <GraduationCap size={10} />
+                        <span className="truncate">{app.candidateUniversity}</span>
+                      </div>
+                    )}
+
+                    {isInterview && app.interviewDate && (
+                      <div className="text-[10px] px-2 py-1 rounded-lg flex items-center gap-1.5 font-medium" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
+                        <CalendarClock size={10} />
+                        {app.interviewDate} · {app.interviewTime}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between text-[10px] pt-1.5 mt-1 border-t" style={{ borderColor: 'var(--border-3)' }}>
+                      <span className="font-mono" style={{ color: 'var(--text-5)' }}>Applied {app.appliedDate}</span>
+                      <span className="font-semibold" style={{ color: colColor }}>Review →</span>
+                    </div>
+                  </div>
+                )
+
+                // ── Standard candidate job-seeker card ────────────────
+                const candidateCardBody = (
                   <div className="flex flex-col gap-2.5">
-                    {/* Top row: Avatar + Company */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <CompanyAvatar name={app.company} size="sm" />
@@ -87,7 +150,6 @@ export default function ApplicationKanban({ applications, onCardClick, onAdvance
                       </span>
                     </div>
 
-                    {/* Next step info box */}
                     {app.nextStep && (
                       <div
                         className="text-[11px] px-2.5 py-1.5 rounded-lg flex items-start gap-1.5 font-medium border"
@@ -110,7 +172,6 @@ export default function ApplicationKanban({ applications, onCardClick, onAdvance
                       </div>
                     )}
 
-                    {/* Quick action button inside card */}
                     <div className="flex items-center justify-between text-[11px] pt-2 mt-1 border-t" style={{ borderColor: 'var(--border-3)' }}>
                       <span className="font-mono text-[10px]" style={{ color: 'var(--text-5)' }}>
                         {app.appliedDate ? `Applied ${app.appliedDate}` : isSaved ? 'Saved in Wishlist' : 'Active'}
@@ -132,6 +193,8 @@ export default function ApplicationKanban({ applications, onCardClick, onAdvance
                     </div>
                   </div>
                 )
+
+                const cardBody = isRecruiter ? recruiterCardBody : candidateCardBody
 
                 if (onCardClick) {
                   return (
@@ -164,7 +227,7 @@ export default function ApplicationKanban({ applications, onCardClick, onAdvance
 
               {column.length === 0 && (
                 <div className="py-8 text-center rounded-xl border border-dashed" style={{ borderColor: 'var(--border-3)' }}>
-                  <EmptyState message={`No ${status.toLowerCase()} jobs`} />
+                  <EmptyState message={`No ${status.toLowerCase()} ${isRecruiter ? 'candidates' : 'jobs'}`} />
                 </div>
               )}
             </div>

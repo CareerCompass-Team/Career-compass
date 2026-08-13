@@ -41,9 +41,8 @@ function ScoreBadge({ score }) {
 
 export default function RecruiterDashboard() {
   const navigate = useNavigate()
-  const { user, postVerifiedJob, scheduleCandidateInterview } = useAppData()
+  const { user, applications, updateApplicationStatus, postVerifiedJob, scheduleCandidateInterview } = useAppData()
 
-  const [candidates, setCandidates] = useState(RECRUITER_CANDIDATES)
   const [listings, setListings] = useState(RECRUITER_LISTINGS)
   const [activeTab, setActiveTab] = useState('overview')  // 'overview' | 'pipeline' | 'listings' | 'interviews'
   const [selectedListing, setSelectedListing] = useState(null)   // filter pipeline by listing
@@ -53,6 +52,32 @@ export default function RecruiterDashboard() {
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [candidateForSchedule, setCandidateForSchedule] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Map candidates directly from shared AppDataContext applications state
+  const candidates = applications.map(app => ({
+    id: app.id,
+    listingId: app.jobId || 'rl1',
+    name: app.candidateName || app.role,
+    avatar: (app.candidateName || 'Candidate').split(' ').map(n => n[0]).join('').slice(0, 2),
+    university: app.candidateUniversity || 'University of Nairobi',
+    course: app.candidateCourse || 'BSc Computer Science',
+    location: app.location || 'Nairobi',
+    appliedDate: app.appliedDate || 'Aug 5, 2026',
+    stage: app.status || 'Applied',
+    atsScore: app.matchScore || 85,
+    skills: app.matchedSkills || ['React', 'JavaScript'],
+    matchedSkills: app.matchedSkills || ['React', 'JavaScript'],
+    missingSkills: app.missingSkills || ['Git'],
+    cvFile: app.cvFile || 'Candidate_CV.pdf',
+    coverLetter: app.coverLetter || 'Enthusiastic software developer...',
+    timeline: app.timeline || [{ date: app.appliedDate || 'Aug 5', event: 'Application submitted' }],
+    notes: app.notes || '',
+    phone: app.candidatePhone || '+254 700 000 000',
+    email: app.candidateEmail || 'candidate@example.com',
+    interviewDate: app.interviewDate,
+    interviewTime: app.interviewTime,
+    meetLink: app.meetLink,
+  }))
 
   // Post job form
   const [jobTitle, setJobTitle] = useState('')
@@ -69,25 +94,16 @@ export default function RecruiterDashboard() {
   const [meetingLink, setMeetingLink] = useState('https://meet.google.com/career-compass-interview')
 
   const moveStage = (candidateId, nextStage) => {
-    setCandidates(prev => prev.map(c =>
-      c.id === candidateId
-        ? {
-            ...c,
-            stage: nextStage,
-            timeline: [...c.timeline, {
-              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              event: `Recruiter moved to ${nextStage}`,
-            }],
-          }
-        : c
-    ))
-    // If a candidate is selected in review panel, update them too
+    updateApplicationStatus(candidateId, nextStage, `Recruiter moved to ${nextStage}`)
     if (selectedCandidate?.id === candidateId) {
       setSelectedCandidate(prev => ({ ...prev, stage: nextStage }))
     }
     if (nextStage === 'Interview') {
-      setCandidateForSchedule(candidates.find(c => c.id === candidateId))
-      setShowScheduleModal(true)
+      const target = candidates.find(c => c.id === candidateId)
+      if (target) {
+        setCandidateForSchedule(target)
+        setShowScheduleModal(true)
+      }
     }
   }
 
@@ -100,11 +116,6 @@ export default function RecruiterDashboard() {
       time: meetingTime,
       meetingLink: meetingLink,
     })
-    setCandidates(prev => prev.map(c =>
-      c.id === candidateForSchedule.id
-        ? { ...c, interviewDate: meetingDate, interviewTime: meetingTime, meetLink: meetingLink, stage: 'Interview', timeline: [...c.timeline, { date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), event: `${meetingRound} scheduled for ${meetingDate} at ${meetingTime}` }] }
-        : c
-    ))
     setShowScheduleModal(false)
     setCandidateForSchedule(null)
   }
