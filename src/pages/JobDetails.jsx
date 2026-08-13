@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   MapPin, Briefcase, Wallet, Clock, Heart, CheckCircle2,
-  ArrowLeft, ExternalLink, Globe, ShieldCheck,
+  ArrowLeft, ArrowRight, ExternalLink, Globe, ShieldCheck,
 } from 'lucide-react'
 import { useAppData } from '../context/AppDataContext'
 import CompanyAvatar from '../components/ui/CompanyAvatar'

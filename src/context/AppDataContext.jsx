@@ -301,6 +301,10 @@ export function AppDataProvider({ children }) {
     setUser(u => ({ ...u, isNewUser: false, tourDismissed: true }))
   }
 
+  const restartTour = () => {
+    setUser(u => ({ ...u, isNewUser: true, tourDismissed: false }))
+  }
+
   const verifyEmployer = ({ companyRegistration, workEmail, website }) => {
     setUser(u => ({
       ...u,
@@ -690,6 +694,7 @@ export function AppDataProvider({ children }) {
     logout,
     dismissNewUserNotice,
     dismissTour,
+    restartTour,
     verifyEmployer,
     postVerifiedJob,
     toggleSaveJob,
