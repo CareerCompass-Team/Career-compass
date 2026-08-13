@@ -1,13 +1,14 @@
-import { FileText, Star, Trash2 } from 'lucide-react'
+import { FileText, Star, Trash2, Eye } from 'lucide-react'
 
-export default function ResumeCard({ resume, onSetDefault, onDelete, style }) {
+export default function ResumeCard({ resume, onSetDefault, onDelete, onView, style }) {
   return (
     <div
-      className="rounded-xl p-5 flex flex-col gap-3 transition-all hover-lift stagger-item"
+      onClick={() => onView && onView(resume)}
+      className="rounded-xl p-5 flex flex-col gap-3 transition-all hover-lift stagger-item cursor-pointer group relative"
       style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)', ...style }}
     >
       <div className="flex items-start justify-between">
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent-bg)', color: 'var(--accent-text)' }}>
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-105" style={{ background: 'var(--accent-bg)', color: 'var(--accent-text)' }}>
           <FileText size={18} />
         </div>
         {resume.isDefault && (
@@ -18,7 +19,10 @@ export default function ResumeCard({ resume, onSetDefault, onDelete, style }) {
       </div>
 
       <div>
-        <div className="text-sm font-medium mb-0.5" style={{ color: 'var(--text-1)' }}>{resume.name}</div>
+        <div className="text-sm font-semibold mb-0.5 group-hover:text-indigo-400 transition-colors flex items-center justify-between" style={{ color: 'var(--text-1)' }}>
+          <span>{resume.name}</span>
+          <Eye size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-indigo-400" />
+        </div>
         <div className="text-xs" style={{ color: 'var(--text-4)' }}>{resume.targetRole}</div>
       </div>
 
@@ -29,18 +33,26 @@ export default function ResumeCard({ resume, onSetDefault, onDelete, style }) {
       </div>
 
       <div className="flex items-center gap-2 pt-2" style={{ borderTop: '1px solid var(--border-3)' }}>
+        <button
+          onClick={(e) => { e.stopPropagation(); onView && onView(resume) }}
+          className="text-xs px-2.5 py-1.5 rounded-lg transition-colors font-medium flex items-center gap-1 text-indigo-400 border press-scale"
+          style={{ background: 'rgba(99,102,241,0.08)', borderColor: 'rgba(99,102,241,0.2)' }}
+        >
+          <Eye size={12} /> Read & Edit
+        </button>
+
         {!resume.isDefault && (
           <button
-            onClick={() => onSetDefault(resume.id)}
+            onClick={(e) => { e.stopPropagation(); onSetDefault(resume.id) }}
             className="text-xs px-2.5 py-1.5 rounded-lg transition-colors press-scale"
             style={{ background: 'var(--surface-hover)', color: 'var(--text-3)' }}
           >
-            Set as default
+            Set default
           </button>
         )}
         <button
-          onClick={() => onDelete(resume.id)}
-          className="text-xs px-2.5 py-1.5 rounded-lg transition-colors press-scale ml-auto flex items-center gap-1"
+          onClick={(e) => { e.stopPropagation(); onDelete(resume.id) }}
+          className="text-xs px-2.5 py-1.5 rounded-lg transition-colors press-scale ml-auto flex items-center gap-1 hover:text-rose-400"
           style={{ color: 'var(--text-5)' }}
         >
           <Trash2 size={12} />Delete

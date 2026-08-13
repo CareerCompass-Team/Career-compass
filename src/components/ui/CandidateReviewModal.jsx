@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   X, FileText, Star, MessageSquare, CheckCircle2, XCircle,
   Mic2, ChevronRight, Award, ClipboardCheck, User2, Phone,
   Mail, Calendar, Clock, Building2, PlayCircle, PauseCircle,
   ThumbsUp, ThumbsDown, AlertCircle, Wand2
 } from 'lucide-react'
+import { useAppData } from '../../context/AppDataContext'
+import SendOfferModal from './SendOfferModal'
 
 // Mock candidate data generator based on application
 function buildCandidateProfile(app) {
@@ -42,6 +45,7 @@ const STAGE_TABS = {
 }
 
 export default function CandidateReviewModal({ app, initialTab, onClose, onAction }) {
+  const { scheduleCandidateInterview } = useAppData()
   const candidate = buildCandidateProfile(app)
   const tabs      = STAGE_TABS[app.status] || ['Application']
 
@@ -55,10 +59,28 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [showOfferModal, setShowOfferModal] = useState(false)
 
   const actions = nextActions(app.status)
-
   const [copiedCv, setCopiedCv] = useState(false)
+
+  const handleActionClick = (next) => {
+    if (next === 'Offer') {
+      setShowOfferModal(true)
+    } else if (next === 'Interview') {
+      scheduleCandidateInterview(app.id, {
+        round: 'Technical Interview',
+        date: 'Aug 22, 2026',
+        time: '10:00 AM',
+        meetingLink: 'https://meet.google.com/career-compass-interview',
+      })
+      if (onAction) onAction(next)
+      onClose()
+    } else {
+      if (onAction) onAction(next)
+      onClose()
+    }
+  }
 
   const handleDownloadCv = () => {
     const element = document.createElement("a")
@@ -84,15 +106,15 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
     setTimeout(() => setCopiedCv(false), 2500)
   }
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 animate-fadeIn"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fadeIn"
       style={{ background: 'rgba(8,14,31,0.85)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl border flex flex-col overflow-hidden animate-scaleIn"
-        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+        className="relative w-full max-w-4xl max-h-[90vh] rounded-2xl border flex flex-col overflow-hidden animate-scaleIn my-auto shrink-0 shadow-2xl"
+        style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)', color: 'var(--text-1)' }}
         onClick={e => e.stopPropagation()}
       >
 
@@ -507,7 +529,7 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
             style={{ borderColor: 'var(--border-1)', background: 'var(--bg-page)' }}>
             <span className="text-xs" style={{ color: 'var(--text-4)' }}>Quick action:</span>
             {actions.map(({ label, next }) => (
-              <button key={next} onClick={() => { onAction(next); onClose() }}
+              <button key={next} onClick={() => handleActionClick(next)}
                 className="text-xs px-4 py-2 rounded-xl font-semibold press-scale"
                 style={next === 'Not Selected'
                   ? { background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }
@@ -517,8 +539,22 @@ export default function CandidateReviewModal({ app, initialTab, onClose, onActio
             ))}
           </div>
         )}
+
+        {/* Send Offer Modal */}
+        {showOfferModal && (
+          <SendOfferModal
+            candidate={app}
+            isOpen={showOfferModal}
+            onClose={() => setShowOfferModal(false)}
+            onSuccess={() => {
+              if (onAction) onAction('Offer')
+              onClose()
+            }}
+          />
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

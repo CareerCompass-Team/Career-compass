@@ -373,6 +373,56 @@ export const resumes = [
     targetRole: 'Software Engineering',
     size: '284 KB',
     format: 'PDF',
+    content: `GLADYS WANJIKU
+gladys.wanjiku@email.com | +254 712 345 678 | Nairobi, Kenya
+linkedin.com/in/gladyswanjiku | github.com/gladyswanjiku
+
+PROFESSIONAL SUMMARY
+Motivated Software Engineer with 2+ years of experience building responsive web applications and RESTful APIs. Proficient in React, Node.js, and Python. Passionate about clean code, user-centric design, and delivering measurable impact.
+
+TECHNICAL SKILLS
+Languages: JavaScript (ES2022), Python, TypeScript, SQL
+Frontend: React.js, Next.js, HTML5, CSS3, Tailwind CSS
+Backend: Node.js, Express.js, FastAPI, REST APIs
+Database: PostgreSQL, MongoDB, Firebase
+Tools: Git, Docker, Postman, Figma, VS Code, Linux
+
+WORK EXPERIENCE
+
+Software Engineering Intern — Andela, Nairobi
+Feb 2024 – Aug 2024
+• Built and maintained 12 React components for the internal recruiter dashboard, reducing page load time by 40%.
+• Developed REST API endpoints in Node.js/Express that handled 50k+ daily requests.
+• Collaborated in Agile sprints using Jira and GitHub to ship bi-weekly feature releases.
+• Wrote unit and integration tests (Jest) achieving 85% code coverage on assigned modules.
+
+Junior Web Developer — Freelance, Remote
+Jul 2023 – Jan 2024
+• Delivered 5 end-to-end projects for SME clients across e-commerce and fintech sectors.
+• Integrated M-Pesa Daraja API for a local retail client, processing KES 2M+ monthly.
+• Built a React + Firebase progressive web app, reducing client's phone query volume by 30%.
+
+EDUCATION
+
+BSc. Computer Science — University of Nairobi
+Sep 2020 – Jun 2024 | Second Class Upper (GPA: 3.6/4.0)
+
+Relevant Coursework: Data Structures & Algorithms, Operating Systems, Software Engineering, Database Systems, Machine Learning Fundamentals.
+
+PROJECTS
+
+CareerCompass (Capstone, 2024)
+Full-stack career management platform built with React + Vite, Node.js, and PostgreSQL. Features AI-powered ATS resume scoring and job matching.
+
+SafariPay (Hackathon Winner, 2023)
+Mobile-first React PWA integrating M-Pesa and Equity APIs for peer-to-peer micro-lending. Won 1st place at NaiHacks 2023.
+
+CERTIFICATIONS
+• Meta Front-End Developer Professional Certificate (Coursera, 2023)
+• AWS Certified Cloud Practitioner (2024)
+
+LANGUAGES
+English (Fluent) | Swahili (Native)`,
   },
   {
     id: 'r2',
@@ -384,6 +434,44 @@ export const resumes = [
     targetRole: 'Frontend Development',
     size: '312 KB',
     format: 'PDF',
+    content: `GLADYS WANJIKU — FRONTEND ENGINEER
+gladys.wanjiku@email.com | +254 712 345 678 | Nairobi, Kenya
+Portfolio: gladyscode.dev | GitHub: @gladyswanjiku
+
+CORE FRONTEND SKILLS
+React.js • Next.js • TypeScript • JavaScript (ES2022)
+Tailwind CSS • CSS-in-JS • Framer Motion • GSAP
+Vite • Webpack • ESLint • Prettier
+Storybook • Jest • React Testing Library
+Figma → Code (Design handoff) • WCAG Accessibility
+
+PROFESSIONAL EXPERIENCE
+
+Frontend Engineer Intern — Andela, Nairobi
+Feb 2024 – Aug 2024
+• Led UI rebuild of recruiter analytics dashboard using React + TypeScript — delivered 3 weeks ahead of schedule.
+• Implemented skeleton loading states and optimistic UI updates, improving perceived performance score (Lighthouse) from 62 → 91.
+• Created a reusable component library (24 components) in Storybook; adopted across 3 teams.
+• Mentored 2 junior interns in React best practices and code review etiquette.
+
+Frontend Developer — Freelance
+Jul 2023 – Jan 2024
+• Designed and built 5 responsive marketing sites and web apps for local businesses using React and Next.js.
+• Achieved Core Web Vitals "green" status (LCP < 2.5s, CLS < 0.1) across all client projects.
+
+KEY PROJECTS
+
+CompassUI Design System (2024)
+Open-source React component library with 40+ accessible components, theming support, and full TypeScript definitions. 120+ GitHub stars.
+
+Nairobi Jobs Board (2023)
+Next.js + Supabase job aggregator, Server-Side Rendered for SEO, with real-time job alerts via WebSockets.
+
+EDUCATION
+BSc. Computer Science — University of Nairobi | 2020 – 2024 | Second Class Upper
+
+CERTIFICATIONS
+Meta Front-End Developer Certificate | Google UX Design Certificate`,
   },
   {
     id: 'r3',
@@ -395,6 +483,50 @@ export const resumes = [
     targetRole: 'AI / Machine Learning',
     size: '298 KB',
     format: 'PDF',
+    content: `GLADYS WANJIKU
+AI / Machine Learning Enthusiast
+gladys.wanjiku@email.com | +254 712 345 678 | Nairobi, Kenya
+github.com/gladyswanjiku | kaggle.com/gladyswanjiku
+
+OBJECTIVE
+Aspiring ML Engineer seeking an AI internship to apply hands-on machine learning and NLP skills in a product-focused team. Strong foundation in Python, scikit-learn, and TensorFlow, with a drive to build AI systems that solve real-world African market challenges.
+
+ML / AI SKILLS
+Python (NumPy, Pandas, Matplotlib, Seaborn)
+Scikit-learn | TensorFlow | Keras | Hugging Face Transformers
+Natural Language Processing (NLP) | Text Classification | Sentiment Analysis
+Computer Vision (OpenCV, CNNs) | Feature Engineering
+Jupyter Notebook | Google Colab | MLflow (experiment tracking)
+
+ACADEMIC ML PROJECTS
+
+Swahili News Classifier (Final Year Project, 2024)
+• Fine-tuned mBERT on a custom 15,000-article Swahili corpus to classify news into 8 categories.
+• Achieved 91.4% validation accuracy, outperforming baseline Naive Bayes by 18%.
+• Deployed as a FastAPI endpoint on Google Cloud Run.
+
+Crop Disease Detection (2023)
+• Built a CNN (EfficientNetB3) to detect 7 maize diseases from leaf images for Kenyan smallholder farmers.
+• Trained on augmented PlantVillage dataset; 94% F1-score on test set.
+• Packaged as a mobile-friendly PWA for offline use.
+
+M-Pesa Fraud Detection (2023)
+• Developed an XGBoost fraud detection model on simulated M-Pesa transaction data.
+• Reduced false positive rate to 2.1% while maintaining 96% recall on fraud cases.
+
+RELEVANT COURSEWORK
+Machine Learning Fundamentals | Deep Learning | Data Structures | Probability & Statistics | Linear Algebra
+
+EDUCATION
+BSc. Computer Science — University of Nairobi | 2020 – 2024
+GPA: 3.7/4.0 (Distinction in ML course unit)
+
+CERTIFICATIONS
+DeepLearning.AI TensorFlow Developer Certificate (2024)
+Kaggle: Machine Learning & Pandas Certifications (2023)
+
+LANGUAGES
+Python | R | SQL | Swahili (Native) | English (Fluent)`,
   },
 ]
 

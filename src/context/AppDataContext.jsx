@@ -1,10 +1,15 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import * as mock from '../data/mockData'
-import { fetchLiveJobs } from '../Services/JobApi'
+import { RECRUITER_APPLICATIONS_MOCK } from '../data/recruiterMockData'
+import { fetchLiveJobs } from '../Services/jobApi'
 
 const AppDataContext = createContext(null)
-const STORAGE_KEY = 'careercompass-data-v2'
 const USER_KEY = 'careercompass-user-session'
+
+// Per-user data bucket keyed by email so different accounts never share state
+function dataKey(email) {
+  return `careercompass-data-v3-${(email || 'guest').toLowerCase()}`
+}
 
 function getInitialUser() {
   try {
@@ -16,7 +21,8 @@ function getInitialUser() {
   return {
     isLoggedIn: true,
     isNewUser: false,
-    role: 'candidate', // 'candidate' | 'recruiter'
+    tourDismissed: true,
+    role: 'candidate',
     name: mock.profile.name,
     email: mock.profile.email,
     companyName: 'TechCorp Africa',
@@ -26,13 +32,13 @@ function getInitialUser() {
   }
 }
 
-function loadInitialData() {
-  const defaults = {
+function mockDefaults() {
+  return {
     jobs: mock.jobs.map(j => ({
       ...j,
       isVerified: true,
       sourceTag: j.location?.includes('Remote') ? 'Global Remote' : 'Kenya Local',
-      source: 'internal',   // in-app posting — SmartApply uses in-app form
+      source: 'internal',
       applyUrl: null,
     })),
     applications: mock.applications || [],
@@ -40,22 +46,122 @@ function loadInitialData() {
     resumes: mock.resumes || [],
     profile: mock.profile || {},
   }
+}
+
+function emptyUserData() {
+  return {
+    jobs: mock.jobs.map(j => ({
+      ...j,
+      isVerified: true,
+      sourceTag: j.location?.includes('Remote') ? 'Global Remote' : 'Kenya Local',
+      source: 'internal',
+      applyUrl: null,
+      saved: false,
+    })),
+    applications: [],
+    interviews: [],
+    resumes: [],
+    profile: {},
+  }
+}
+
+const RECRUITER_INTERVIEWS_MOCK = [
+  {
+    id: 'iv-rec-1',
+    applicationId: 'rc3',
+    company: 'Safaricom',
+    role: 'Software Engineering Intern',
+    candidateName: 'David Kamau',
+    candidateEmail: 'david.kamau@usiu.ac.ke',
+    date: 'Aug 16, 2026',
+    time: '10:00 AM',
+    round: 'Technical Interview',
+    type: 'Google Meet',
+    status: 'Upcoming',
+    meetingLink: 'https://meet.google.com/career-compass-david',
+    interviewers: ['Engineering Lead', 'Hiring Manager'],
+    prepNotes: [
+      { id: 'p1', text: "Review David's GitHub portfolio and coding submission", checked: true },
+      { id: 'p2', text: 'Prepare React architecture and state management questions', checked: false },
+    ],
+    questions: [],
+    notes: 'Top candidate from ATS screen (94% match).',
+  },
+  {
+    id: 'iv-rec-2',
+    applicationId: 'rc8',
+    company: 'Safaricom',
+    role: 'UX/UI Design Intern',
+    candidateName: 'Nasrin Mohamed',
+    candidateEmail: 'nasrin.m@strathmore.edu',
+    date: 'Aug 17, 2026',
+    time: '11:00 AM',
+    round: 'Portfolio & Design Challenge Review',
+    type: 'Google Meet',
+    status: 'Upcoming',
+    meetingLink: 'https://meet.google.com/career-compass-nasrin',
+    interviewers: ['Product Design Lead'],
+    prepNotes: [
+      { id: 'p1', text: 'Review Figma interactive prototype submission', checked: true },
+    ],
+    questions: [],
+    notes: 'Outstanding portfolio. High potential for internship.',
+  },
+  {
+    id: 'iv-rec-3',
+    applicationId: 'rc5',
+    company: 'Safaricom',
+    role: 'Frontend Developer Intern',
+    candidateName: 'Jemimah Achieng',
+    candidateEmail: 'jemimah.a@tuk.ac.ke',
+    date: 'Aug 14, 2026',
+    time: '2:00 PM',
+    round: 'Technical Interview',
+    type: 'Google Meet',
+    status: 'Completed',
+    meetingLink: 'https://meet.google.com/career-compass-jemimah',
+    interviewers: ['Engineering Lead'],
+    prepNotes: [
+      { id: 'p1', text: 'Completed with score 96/100', checked: true },
+    ],
+    questions: [],
+    notes: 'Scored 96/100. Recommended for offer.',
+  },
+]
+
+function loadDataForUser(email, role = 'candidate') {
+  const isRecruiter = role === 'recruiter'
+  const isMockUser = email === mock.profile?.email
+
+  if (!email) {
+    return isRecruiter
+      ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK, interviews: RECRUITER_INTERVIEWS_MOCK }
+      : mockDefaults()
+  }
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(dataKey(email))
     if (raw) {
       const parsed = JSON.parse(raw)
       return {
-        jobs: Array.isArray(parsed.jobs) ? parsed.jobs : defaults.jobs,
-        applications: Array.isArray(parsed.applications) ? parsed.applications : defaults.applications,
-        interviews: Array.isArray(parsed.interviews) ? parsed.interviews : defaults.interviews,
-        resumes: Array.isArray(parsed.resumes) ? parsed.resumes : defaults.resumes,
-        profile: parsed.profile || defaults.profile,
+        jobs: Array.isArray(parsed.jobs) ? parsed.jobs : isMockUser ? mockDefaults().jobs : emptyUserData().jobs,
+        applications: Array.isArray(parsed.applications) && parsed.applications.length > 0
+          ? parsed.applications
+          : isRecruiter ? RECRUITER_APPLICATIONS_MOCK : (isMockUser ? mock.applications : []),
+        interviews: Array.isArray(parsed.interviews) && parsed.interviews.length > 0
+          ? parsed.interviews
+          : isRecruiter ? RECRUITER_INTERVIEWS_MOCK : (isMockUser ? mock.interviews : []),
+        resumes: Array.isArray(parsed.resumes) ? parsed.resumes : isMockUser ? mock.resumes : [],
+        profile: parsed.profile || (isMockUser ? mock.profile : {}),
       }
     }
   } catch {
     // fall through
   }
-  return defaults
+
+  return isRecruiter
+    ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK, interviews: RECRUITER_INTERVIEWS_MOCK }
+    : (isMockUser ? mockDefaults() : emptyUserData())
 }
 
 function today() {
@@ -67,20 +173,22 @@ function uid(prefix) {
 }
 
 export function AppDataProvider({ children }) {
-  const [data, setData] = useState(loadInitialData)
-  const [user, setUser] = useState(getInitialUser)
+  const initialUser = getInitialUser()
+  const [data, setData] = useState(() => loadDataForUser(initialUser.email, initialUser.role))
+  const [user, setUser] = useState(initialUser)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState('login')
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
 
-  // Persist data changes
+  // Persist data to the CURRENT USER's isolated bucket on every change
   useEffect(() => {
+    if (!user?.email) return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+      localStorage.setItem(dataKey(user.email), JSON.stringify(data))
     } catch {
       // non-fatal
     }
-  }, [data])
+  }, [data, user?.email])
 
   // Load live external jobs from API on mount
   useEffect(() => {
@@ -95,6 +203,7 @@ export function AppDataProvider({ children }) {
     })
   }, [])
 
+  // Persist user session
   useEffect(() => {
     try {
       localStorage.setItem(USER_KEY, JSON.stringify(user))
@@ -125,18 +234,22 @@ export function AppDataProvider({ children }) {
     const nameFromEmail = email.split('@')[0]
     const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1)
     const initials = formattedName.substring(0, 2).toUpperCase()
-
-    setUser({
+    const isMockUser = email === mock.profile?.email
+    const restoredUser = {
       isLoggedIn: true,
       isNewUser: false,
+      tourDismissed: true,
       role,
-      name: role === 'candidate' ? (email === mock.profile.email ? mock.profile.name : formattedName) : `${formattedName} (Recruiter)`,
+      name: isMockUser ? mock.profile.name : (role === 'recruiter' ? `${formattedName} (Recruiter)` : formattedName),
       email,
       companyName: role === 'recruiter' ? `${formattedName} Talent` : '',
       isVerifiedEmployer: role === 'recruiter',
       avatar: initials,
       experienceLevel: role === 'recruiter' ? 'Hiring Manager' : 'Job Seeker',
-    })
+    }
+    setUser(restoredUser)
+    // Load that user's own data bucket
+    setData(loadDataForUser(email, role))
     setAuthModalOpen(false)
   }
 
@@ -148,17 +261,21 @@ export function AppDataProvider({ children }) {
       .substring(0, 2)
       .toUpperCase()
 
-    setUser({
+    const newUser = {
       isLoggedIn: true,
       isNewUser: true,
+      tourDismissed: false,
       role,
       name,
       email,
       companyName: role === 'recruiter' ? (companyName || `${name}'s Organization`) : '',
-      isVerifiedEmployer: false, // Must undergo anti-scam check
+      isVerifiedEmployer: false,
       avatar: initials || 'CC',
       experienceLevel: role === 'recruiter' ? 'Hiring Manager' : experienceLevel,
-    })
+    }
+    setUser(newUser)
+    // Brand-new account → initialize with recruiter defaults or empty candidate slate
+    setData(role === 'recruiter' ? { ...emptyUserData(), applications: RECRUITER_APPLICATIONS_MOCK, interviews: RECRUITER_INTERVIEWS_MOCK } : emptyUserData())
     setAuthModalOpen(false)
   }
 
@@ -178,6 +295,10 @@ export function AppDataProvider({ children }) {
 
   const dismissNewUserNotice = () => {
     setUser(u => ({ ...u, isNewUser: false }))
+  }
+
+  const dismissTour = () => {
+    setUser(u => ({ ...u, isNewUser: false, tourDismissed: true }))
   }
 
   const verifyEmployer = ({ companyRegistration, workEmail, website }) => {
@@ -218,18 +339,88 @@ export function AppDataProvider({ children }) {
 
   // ---- Jobs ----
   const toggleSaveJob = jobId => {
-    setData(d => ({
-      ...d,
-      jobs: d.jobs.map(j => (j.id === jobId ? { ...j, saved: !j.saved } : j)),
-    }))
+    setData(d => {
+      const targetJob = d.jobs.find(j => j.id === jobId)
+      if (!targetJob) return d
+
+      const willBeSaved = !targetJob.saved
+
+      // Update jobs array
+      const updatedJobs = d.jobs.map(j => (j.id === jobId ? { ...j, saved: willBeSaved } : j))
+
+      // Sync with applications array under status: 'Saved'
+      let updatedApps = [...d.applications]
+      const existingApp = updatedApps.find(a => a.jobId === jobId)
+
+      if (willBeSaved) {
+        if (!existingApp) {
+          const newSavedApp = {
+            id: uid('a'),
+            jobId: targetJob.id,
+            company: targetJob.company,
+            role: targetJob.title,
+            status: 'Saved',
+            appliedDate: null,
+            deadline: targetJob.deadline,
+            location: targetJob.location,
+            source: targetJob.source || 'CareerCompass',
+            resumeId: null,
+            resumeName: null,
+            coverLetter: null,
+            notes: 'Saved to wishlist for review',
+            nextStep: 'Prepare application & CV',
+            timeline: [{ date: today(), event: 'Job saved to wishlist' }],
+          }
+          updatedApps = [newSavedApp, ...updatedApps]
+        }
+      } else {
+        // If unsaved and it's currently in 'Saved' status, remove from applications
+        if (existingApp && existingApp.status === 'Saved') {
+          updatedApps = updatedApps.filter(a => a.id !== existingApp.id)
+        }
+      }
+
+      return {
+        ...d,
+        jobs: updatedJobs,
+        applications: updatedApps,
+      }
+    })
   }
 
   const applyToJob = (jobId, { resumeId = null, resumeName = null, coverLetter = null } = {}) => {
     const job = data.jobs.find(j => j.id === jobId)
     if (!job) return null
-    const existing = data.applications.find(a => a.jobId === jobId)
-    if (existing) return existing.id
 
+    const existing = data.applications.find(a => a.jobId === jobId)
+
+    // If existing app is already submitted (not 'Saved'), return existing ID
+    if (existing && existing.status !== 'Saved') {
+      return existing.id
+    }
+
+    if (existing && existing.status === 'Saved') {
+      // Transition existing 'Saved' app to 'Applied'
+      const updatedApp = {
+        ...existing,
+        status: 'Applied',
+        appliedDate: today(),
+        resumeId,
+        resumeName,
+        coverLetter,
+        nextStep: 'Awaiting recruiter response',
+        timeline: [...existing.timeline, { date: today(), event: 'Application submitted to verified employer' }],
+      }
+
+      setData(d => ({
+        ...d,
+        applications: d.applications.map(a => (a.id === existing.id ? updatedApp : a)),
+        jobs: d.jobs.map(j => (j.id === jobId ? { ...j, saved: true } : j)),
+      }))
+      return existing.id
+    }
+
+    // Create fresh application if none existed
     const newApp = {
       id: uid('a'),
       jobId,
@@ -239,7 +430,7 @@ export function AppDataProvider({ children }) {
       appliedDate: today(),
       deadline: job.deadline,
       location: job.location,
-      source: 'CareerCompass',
+      source: job.source || 'CareerCompass',
       resumeId,
       resumeName,
       coverLetter,
@@ -248,7 +439,11 @@ export function AppDataProvider({ children }) {
       timeline: [{ date: today(), event: 'Application submitted to verified employer' }],
     }
 
-    setData(d => ({ ...d, applications: [newApp, ...d.applications] }))
+    setData(d => ({
+      ...d,
+      applications: [newApp, ...d.applications],
+      jobs: d.jobs.map(j => (j.id === jobId ? { ...j, saved: true } : j)),
+    }))
     return newApp.id
   }
 
@@ -320,6 +515,76 @@ export function AppDataProvider({ children }) {
     return newInterview.id
   }
 
+  // ---- Recruiter Schedule Interview for Candidate ----
+  const scheduleCandidateInterview = (candidateId, { round, date, time, meetingLink }) => {
+    const app = data.applications.find(a => a.id === candidateId)
+    const company = app ? app.company : (user?.companyName || 'Safaricom')
+    const role = app ? app.role : 'Engineering Role'
+    const candidateName = app ? (app.candidateName || app.role) : 'Candidate'
+
+    const newInterview = {
+      id: uid('i'),
+      applicationId: candidateId,
+      company,
+      role,
+      candidateName,
+      date: date || today(),
+      time: time || '10:00 AM',
+      round: round || 'Technical Interview',
+      type: 'Google Meet',
+      status: 'Upcoming',
+      meetingLink: meetingLink || 'https://meet.google.com/career-compass-interview',
+      interviewers: ['Recruiter / Hiring Manager'],
+      prepNotes: [
+        { id: uid('p'), text: `Review ${candidateName}'s CV and project portfolio`, checked: false },
+        { id: uid('p'), text: 'Prepare technical questions & coding exercise', checked: false },
+        { id: uid('p'), text: 'Send calendar invite to candidate', checked: true },
+      ],
+      questions: [],
+      notes: `Scheduled ${round || 'Interview'} for ${candidateName} on ${date} at ${time}. Candidate notified via email.`,
+      selfAssessment: { technical: 0, communication: 0, confidence: 0 },
+      result: 'Waiting',
+    }
+
+    setData(d => ({
+      ...d,
+      interviews: [newInterview, ...d.interviews],
+      applications: d.applications.map(a =>
+        a.id === candidateId
+          ? {
+              ...a,
+              status: 'Interview',
+              interviewDate: date,
+              interviewTime: time,
+              meetLink: meetingLink,
+              timeline: [...a.timeline, { date: today(), event: `${round || 'Interview'} scheduled for ${date} at ${time}` }],
+            }
+          : a
+      ),
+    }))
+    return newInterview.id
+  }
+
+  // ---- Recruiter Send Offer to Candidate ----
+  const sendCandidateOffer = (candidateId, offerData) => {
+    setData(d => ({
+      ...d,
+      applications: d.applications.map(a =>
+        a.id === candidateId
+          ? {
+              ...a,
+              status: 'Offer',
+              offerSalary: offerData.salary || 'KES 100,000/mo',
+              offerStartDate: offerData.startDate || 'Sep 1, 2026',
+              offerBenefits: offerData.benefits || 'Medical cover, Remote Fridays, KES 50,000 learning budget',
+              offerLetter: offerData.letter || '',
+              timeline: [...a.timeline, { date: today(), event: `Official Job Offer letter extended (${offerData.salary || 'Competitive'})` }],
+            }
+          : a
+      ),
+    }))
+  }
+
   const togglePrepNote = (interviewId, prepNoteId) => {
     setData(d => ({
       ...d,
@@ -378,9 +643,20 @@ export function AppDataProvider({ children }) {
       applications: 0,
       size: '310 KB',
       format: 'PDF',
+      content: '',
       ...resumeData,
     }
     setData(d => ({ ...d, resumes: [newResume, ...d.resumes] }))
+    return newResume.id
+  }
+
+  const updateResumeContent = (resumeId, content) => {
+    setData(d => ({
+      ...d,
+      resumes: d.resumes.map(r =>
+        r.id === resumeId ? { ...r, content, updatedDate: today() } : r
+      ),
+    }))
   }
 
   const setDefaultResume = resumeId => {
@@ -413,6 +689,7 @@ export function AppDataProvider({ children }) {
     signup,
     logout,
     dismissNewUserNotice,
+    dismissTour,
     verifyEmployer,
     postVerifiedJob,
     toggleSaveJob,
@@ -423,6 +700,8 @@ export function AppDataProvider({ children }) {
     addApplicationNote,
     setApplicationNextStep,
     addInterview,
+    scheduleCandidateInterview,
+    sendCandidateOffer,
     togglePrepNote,
     updateInterviewNotes,
     setSelfAssessment,
@@ -430,6 +709,7 @@ export function AppDataProvider({ children }) {
     addResume,
     setDefaultResume,
     deleteResume,
+    updateResumeContent,
     updateProfile,
   }
 
