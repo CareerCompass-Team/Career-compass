@@ -1,122 +1,74 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { ThemeProvider } from './context/ThemeContext'
+import { AppDataProvider } from './context/AppDataContext'
+import AppShell from './components/layout/AppShell'
+import Landing from './pages/Landing'
+import Dashboard from './pages/Dashboard'
+import RecruiterDashboard from './pages/RecruiterDashboard'
+import Jobs from './pages/Jobs'
+import JobDetails from './pages/JobDetails'
+import Applications from './pages/Applications'
+import ApplicationDetails from './pages/ApplicationDetails'
+import Interviews from './pages/Interviews'
+import InterviewDetails from './pages/InterviewDetails'
+import InterviewPractice from './pages/InterviewPractice'
+import Resumes from './pages/Resumes'
+import Profile from './pages/Profile'
 
-function App() {
-  const [count, setCount] = useState(0)
+import ErrorBoundary from './components/ui/ErrorBoundary'
+import AuthModal from './components/ui/AuthModal'
+import LogoutModal from './components/ui/LogoutModal'
+import { useAppData } from './context/AppDataContext'
+import { useNavigate } from 'react-router-dom'
+
+function GlobalLogoutModalWrapper() {
+  const navigate = useNavigate()
+  const { logoutModalOpen, closeLogoutModal, logout } = useAppData()
+
+  const handleConfirmLogout = () => {
+    closeLogoutModal()
+    logout()
+    navigate('/')
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+    <LogoutModal
+      isOpen={logoutModalOpen}
+      onClose={closeLogoutModal}
+      onConfirm={handleConfirmLogout}
+    />
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AppDataProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public marketing page — no sidebar, its own nav */}
+              <Route path="/" element={<Landing />} />
+
+              {/* Authenticated app screens — wrapped in the sidebar shell */}
+              <Route path="/dashboard" element={<AppShell><Dashboard /></AppShell>} />
+              <Route path="/recruiter" element={<AppShell><RecruiterDashboard /></AppShell>} />
+              <Route path="/jobs" element={<AppShell><Jobs /></AppShell>} />
+              <Route path="/jobs/:jobId" element={<AppShell><JobDetails /></AppShell>} />
+              <Route path="/applications" element={<AppShell><Applications /></AppShell>} />
+              <Route path="/applications/:id" element={<AppShell><ApplicationDetails /></AppShell>} />
+              <Route path="/interviews" element={<AppShell><Interviews /></AppShell>} />
+              <Route path="/interviews/:id" element={<AppShell><InterviewDetails /></AppShell>} />
+              <Route path="/interviews/:id/practice" element={<AppShell><InterviewPractice /></AppShell>} />
+              <Route path="/resumes" element={<AppShell><Resumes /></AppShell>} />
+              <Route path="/profile" element={<AppShell><Profile /></AppShell>} />
+            </Routes>
+            <AuthModal />
+            <GlobalLogoutModalWrapper />
+          </BrowserRouter>
+        </AppDataProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  )
+}
+
