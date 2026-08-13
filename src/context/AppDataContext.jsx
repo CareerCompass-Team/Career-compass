@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import * as mock from '../data/mockData'
+import { fetchLiveJobs } from '../Services/jobApi'
 
 const AppDataContext = createContext(null)
 const STORAGE_KEY = 'careercompass-data-v2'
@@ -27,7 +28,13 @@ function getInitialUser() {
 
 function loadInitialData() {
   const defaults = {
-    jobs: mock.jobs.map(j => ({ ...j, isVerified: true, sourceTag: j.location?.includes('Remote') ? 'Global Remote' : 'Kenya Local' })),
+    jobs: mock.jobs.map(j => ({
+      ...j,
+      isVerified: true,
+      sourceTag: j.location?.includes('Remote') ? 'Global Remote' : 'Kenya Local',
+      source: 'internal',   // in-app posting — SmartApply uses in-app form
+      applyUrl: null,
+    })),
     applications: mock.applications || [],
     interviews: mock.interviews || [],
     resumes: mock.resumes || [],
@@ -66,6 +73,7 @@ export function AppDataProvider({ children }) {
   const [authMode, setAuthMode] = useState('login')
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
 
+  // Persist data changes
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
@@ -73,6 +81,19 @@ export function AppDataProvider({ children }) {
       // non-fatal
     }
   }, [data])
+
+  // Load live external jobs from API on mount
+  useEffect(() => {
+    fetchLiveJobs().then(liveJobs => {
+      if (!liveJobs || liveJobs.length === 0) return
+      setData(d => {
+        const existingIds = new Set(d.jobs.map(j => j.id))
+        const fresh = liveJobs.filter(j => !existingIds.has(j.id))
+        if (fresh.length === 0) return d
+        return { ...d, jobs: [...d.jobs, ...fresh] }
+      })
+    })
+  }, [])
 
   useEffect(() => {
     try {
@@ -188,6 +209,8 @@ export function AppDataProvider({ children }) {
       saved: false,
       isVerified: user.isVerifiedEmployer,
       sourceTag: jobDetails.location?.toLowerCase().includes('remote') ? 'Global Remote' : 'Kenya Local',
+      source: 'internal',   // posted within CareerCompass — SmartApply uses in-app form
+      applyUrl: null,
     }
     setData(d => ({ ...d, jobs: [newJob, ...d.jobs] }))
     return newJob.id

@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { MapPin, Briefcase, Wallet, Clock, Heart, CheckCircle2, ArrowLeft } from 'lucide-react'
+import {
+  MapPin, Briefcase, Wallet, Clock, Heart, CheckCircle2,
+  ArrowLeft, ExternalLink, FileText, Globe, ShieldCheck, ArrowRight,
+} from 'lucide-react'
 import { useAppData } from '../context/AppDataContext'
 import CompanyAvatar from '../components/ui/CompanyAvatar'
 import ProgressBar from '../components/ui/ProgressBar'
@@ -10,8 +13,11 @@ export default function JobDetails() {
   const { jobId } = useParams()
   const navigate = useNavigate()
   const { jobs, applications, resumes, toggleSaveJob, applyToJob } = useAppData()
+
   const [showApplyModal, setShowApplyModal] = useState(false)
-  const [selectedResumeId, setSelectedResumeId] = useState(resumes.find(r => r.isDefault)?.id ?? resumes[0]?.id ?? null)
+  const [selectedResumeId, setSelectedResumeId] = useState(
+    resumes.find(r => r.isDefault)?.id ?? resumes[0]?.id ?? null
+  )
 
   const job = jobs.find(j => j.id === jobId)
   const existingApplication = applications.find(a => a.jobId === jobId)
@@ -24,9 +30,26 @@ export default function JobDetails() {
     )
   }
 
+  // ── Determine apply mode ──────────────────────────────────────────
+  // 'internal' → posted within CareerCompass → use in-app form
+  // 'external' → fetched from live API → open applyUrl in new tab
+  const isExternal = job.source === 'external' && job.applyUrl
+
+  const handleApplyClick = () => {
+    if (isExternal) {
+      // Open external link immediately — no modal needed
+      window.open(job.applyUrl, '_blank', 'noopener,noreferrer')
+    } else {
+      setShowApplyModal(true)
+    }
+  }
+
   const handleConfirmApply = () => {
     const resume = resumes.find(r => r.id === selectedResumeId)
-    const newAppId = applyToJob(job.id, { resumeId: resume?.id ?? null, resumeName: resume?.name ?? null })
+    const newAppId = applyToJob(job.id, {
+      resumeId: resume?.id ?? null,
+      resumeName: resume?.name ?? null,
+    })
     setShowApplyModal(false)
     navigate(`/applications/${newAppId}`)
   }
@@ -37,6 +60,7 @@ export default function JobDetails() {
         <ArrowLeft size={14} />Back to Jobs
       </Link>
 
+      {/* ── Job Header Card ── */}
       <div className="rounded-xl p-6 mb-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-1)' }}>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-start gap-4">
@@ -48,19 +72,45 @@ export default function JobDetails() {
                 <span className="flex items-center gap-1"><MapPin size={13} />{job.location}</span>
                 <span className="flex items-center gap-1"><Briefcase size={13} />{job.type}</span>
                 <span className="flex items-center gap-1"><Wallet size={13} />{job.salary}</span>
-                <span className="flex items-center gap-1" style={{ color: '#ef4444' }}><Clock size={13} />Deadline {job.deadline}</span>
+                {job.deadline !== 'Open' && (
+                  <span className="flex items-center gap-1" style={{ color: '#ef4444' }}>
+                    <Clock size={13} />Deadline {job.deadline}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="text-right shrink-0">
-            <div className="font-mono text-sm font-medium mb-1" style={{ color: '#10b981' }}>{job.matchScore}% match</div>
-            <div className="w-28"><ProgressBar value={job.matchScore} color="#10b981" /></div>
+          {/* Match score + source badges */}
+          <div className="text-right shrink-0 flex flex-col gap-2 items-end">
+            {job.matchScore && (
+              <>
+                <div className="font-mono text-sm font-medium" style={{ color: '#10b981' }}>{job.matchScore}% match</div>
+                <div className="w-28"><ProgressBar value={job.matchScore} color="#10b981" /></div>
+              </>
+            )}
+            {/* Show source badge */}
+            {isExternal ? (
+              <span
+                className="text-[10px] font-bold px-2.5 py-1 rounded-full border flex items-center gap-1"
+                style={{ background: 'rgba(59,130,246,0.1)', borderColor: 'rgba(59,130,246,0.3)', color: '#60a5fa' }}
+              >
+                <Globe size={10} /> External Listing
+              </span>
+            ) : (
+              <span
+                className="text-[10px] font-bold px-2.5 py-1 rounded-full border flex items-center gap-1"
+                style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.3)', color: '#34d399' }}
+              >
+                <ShieldCheck size={10} /> CareerCompass Verified
+              </span>
+            )}
           </div>
         </div>
 
+        {/* ── Action buttons ── */}
         <div className="flex items-center gap-3 mt-5 pt-5" style={{ borderTop: '1px solid var(--border-3)' }}>
-          {existingApplication ? (
+          {existingApplication && !isExternal ? (
             <Link
               to={`/applications/${existingApplication.id}`}
               className="text-sm px-5 py-2.5 rounded-xl font-medium flex items-center gap-2 press-scale"
@@ -70,13 +120,18 @@ export default function JobDetails() {
             </Link>
           ) : (
             <button
-              onClick={() => setShowApplyModal(true)}
-              className="text-sm px-5 py-2.5 rounded-xl font-medium press-scale"
+              onClick={handleApplyClick}
+              className="text-sm px-5 py-2.5 rounded-xl font-medium press-scale flex items-center gap-2"
               style={{ background: 'var(--accent)', color: 'white' }}
             >
-              Apply Now
+              {isExternal ? (
+                <><ExternalLink size={15} />Apply on {job.company}'s site</>
+              ) : (
+                <>Apply Now</>
+              )}
             </button>
           )}
+
           <button
             onClick={() => toggleSaveJob(job.id)}
             className="text-sm px-4 py-2.5 rounded-xl font-medium flex items-center gap-2 press-scale"
@@ -89,39 +144,101 @@ export default function JobDetails() {
             <Heart size={14} fill={job.saved ? 'currentColor' : 'none'} />
             {job.saved ? 'Saved' : 'Save for later'}
           </button>
+
+          {/* External link hint */}
+          {isExternal && (
+            <span className="text-xs ml-auto" style={{ color: 'var(--text-5)' }}>
+              Opens company careers page in a new tab
+            </span>
+          )}
         </div>
       </div>
 
+      {/* ── External listing info banner ── */}
+      {isExternal && (
+        <div
+          className="rounded-xl p-4 mb-5 flex items-center gap-3 text-xs border"
+          style={{ background: 'rgba(59,130,246,0.06)', borderColor: 'rgba(59,130,246,0.2)', color: 'var(--text-3)' }}
+        >
+          <Globe size={16} className="text-blue-400 shrink-0" />
+          <div>
+            <strong style={{ color: 'var(--text-2)' }}>External Listing</strong> — this role was sourced from a public job board.
+            Clicking Apply will take you directly to the company's own careers page in a new tab.{' '}
+            <span style={{ color: '#f59e0b' }}>We recommend reading the full job description there before submitting.</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Job Content ── */}
       <div className="grid md:grid-cols-3 gap-5">
         <div className="md:col-span-2 flex flex-col gap-5">
-          <Section title="About the role"><p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>{job.description}</p></Section>
-          <Section title="Responsibilities">
-            <ul className="flex flex-col gap-2">
-              {job.responsibilities.map((r, i) => (
-                <li key={i} className="text-sm flex gap-2" style={{ color: 'var(--text-3)' }}>
-                  <span style={{ color: 'var(--accent)' }}>•</span>{r}
-                </li>
-              ))}
-            </ul>
+          <Section title="About the role">
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-3)' }}>{job.description}</p>
           </Section>
+          {job.responsibilities?.length > 0 && (
+            <Section title="Responsibilities">
+              <ul className="flex flex-col gap-2">
+                {job.responsibilities.map((r, i) => (
+                  <li key={i} className="text-sm flex gap-2" style={{ color: 'var(--text-3)' }}>
+                    <span style={{ color: 'var(--accent)' }}>•</span>{r}
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          )}
         </div>
 
         <div className="flex flex-col gap-5">
-          <Section title="Requirements">
-            <TagList items={job.requirements} />
-          </Section>
-          <Section title="Preferred">
-            <TagList items={job.preferred} muted />
-          </Section>
+          {job.requirements?.length > 0 && (
+            <Section title="Requirements"><TagList items={job.requirements} /></Section>
+          )}
+          {job.preferred?.length > 0 && (
+            <Section title="Preferred"><TagList items={job.preferred} muted /></Section>
+          )}
+          {/* External: direct link button */}
+          {isExternal && (
+            <Section title="Apply Externally">
+              <p className="text-xs mb-3" style={{ color: 'var(--text-4)' }}>
+                This listing is hosted by the employer directly.
+              </p>
+              <a
+                href={job.applyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-sm px-4 py-2.5 rounded-xl font-medium press-scale flex items-center justify-center gap-2 text-white"
+                style={{ background: 'var(--accent)', display: 'flex' }}
+              >
+                <ExternalLink size={14} />
+                Open Application Page <ArrowRight size={13} />
+              </a>
+            </Section>
+          )}
         </div>
       </div>
 
-      {showApplyModal && (
+      {/* ── In-App Apply Modal (internal listings only) ── */}
+      {showApplyModal && !isExternal && (
         <Modal title={`Apply to ${job.company}`} onClose={() => setShowApplyModal(false)}>
+          {/* Source confidence notice */}
+          <div
+            className="flex items-start gap-2 p-3 rounded-lg mb-4 text-xs border"
+            style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.2)', color: 'var(--text-3)' }}
+          >
+            <ShieldCheck size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+            <span>
+              <strong style={{ color: '#34d399' }}>CareerCompass Verified Listing.</strong>{' '}
+              Your application stays within the platform and is delivered directly to the verified recruiter.
+            </span>
+          </div>
+
           <p className="text-sm mb-4" style={{ color: 'var(--text-4)' }}>Choose which CV to submit with this application.</p>
+
           <div className="flex flex-col gap-2 mb-6">
             {resumes.length === 0 && (
-              <p className="text-xs" style={{ color: 'var(--text-5)' }}>No CVs uploaded yet — you can still apply and attach one later.</p>
+              <div className="flex items-center gap-2 p-3 rounded-lg text-xs border" style={{ borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
+                <FileText size={14} />
+                No CVs uploaded yet — you can still apply and attach one later from your Resumes page.
+              </div>
             )}
             {resumes.map(r => (
               <label
@@ -143,12 +260,13 @@ export default function JobDetails() {
               </label>
             ))}
           </div>
+
           <button
             onClick={handleConfirmApply}
-            className="w-full text-sm px-5 py-3 rounded-xl font-medium press-scale"
+            className="w-full text-sm px-5 py-3 rounded-xl font-medium press-scale flex items-center justify-center gap-2"
             style={{ background: 'var(--accent)', color: 'white' }}
           >
-            Submit Application
+            Submit Application <ArrowRight size={15} />
           </button>
         </Modal>
       )}
