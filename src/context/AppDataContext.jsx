@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import * as mock from '../data/mockData'
 import { RECRUITER_APPLICATIONS_MOCK } from '../data/recruiterMockData'
-import { fetchLiveJobs } from '../Services/jobApi'
+import { fetchLiveJobs } from '../Services/JobApi'
 
 const AppDataContext = createContext(null)
 const USER_KEY = 'careercompass-user-session'
