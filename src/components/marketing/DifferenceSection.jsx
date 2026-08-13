@@ -1,72 +1,84 @@
-import StatusBadge from '../domain/StatusBadge'
-import { ShieldCheck, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { ShieldCheck, Zap, X, Check } from 'lucide-react'
 
 export default function DifferenceSection() {
+  const [activeCompareTab, setActiveCompareTab] = useState('all')
+
+  const comparisons = [
+    {
+      feature: 'Employer Verification',
+      old: 'Anyone can post without identity or company checks',
+      new: '100% Anti-Scam verified with KRA PIN & organization check',
+      highlight: true,
+    },
+    {
+      feature: 'ATS Resume Scoring',
+      old: 'Paid add-on or restricted to third-party tools',
+      new: 'Free built-in ATS matching & keyword optimizer',
+      highlight: true,
+    },
+    {
+      feature: 'Application Pipeline',
+      old: 'Manual spreadsheets or messy email threads',
+      new: 'Visual Kanban board with automated stage progression',
+      highlight: true,
+    },
+    {
+      feature: 'AI Interview Practice',
+      old: 'Expensive coaching sessions ($50+/hr)',
+      new: 'Built-in AI mock interviews with STAR framework scoring',
+      highlight: true,
+    },
+  ]
+
   return (
-    <section className="max-w-6xl mx-auto px-6 py-16">
-      <div className="text-center mb-12">
-        <div className="inline-block text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-4 border"
-          style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.2)', color: '#10b981' }}>
+    <section className="max-w-6xl mx-auto px-6 py-20">
+      <div className="text-center mb-14">
+        <div
+          className="inline-flex items-center gap-2 text-xs font-bold tracking-widest px-4 py-1.5 rounded-full mb-4 border"
+          style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.3)', color: '#10b981' }}
+        >
           WHY CAREERCOMPASS
         </div>
-        <h2 className="font-display font-bold mb-3" style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: 'var(--text-1)' }}>
+        <h2 className="font-display font-bold mb-3" style={{ fontSize: 'clamp(2rem, 3.5vw, 2.7rem)', color: 'var(--text-1)' }}>
           Built different. On purpose.
         </h2>
-        <p className="text-sm max-w-md mx-auto" style={{ color: 'var(--text-4)' }}>
-          We designed CareerCompass around what job seekers actually need — not what keeps them paying monthly.
+        <p className="text-sm max-w-lg mx-auto" style={{ color: 'var(--text-4)' }}>
+          We designed CareerCompass around what Kenyan job seekers actually need — not what keeps them trapped in monthly subscriptions.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5">
-        {/* Card 1 */}
-        <div className="rounded-2xl p-8 border relative overflow-hidden"
-          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
-          <div aria-hidden="true" style={{
-            position: 'absolute', top: '-40px', right: '-40px',
-            width: '180px', height: '180px', borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)',
-          }} />
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}>
-            <ShieldCheck size={18} />
+      {/* Comparison Matrix Table */}
+      <div
+        className="rounded-3xl border overflow-hidden p-6 md:p-8"
+        style={{ background: 'rgba(14,22,41,0.85)', borderColor: 'rgba(124,58,237,0.3)', backdropFilter: 'blur(16px)' }}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pb-4 border-b text-xs font-bold uppercase tracking-wider" style={{ borderColor: 'var(--border-2)', color: 'var(--text-4)' }}>
+          <div>Feature</div>
+          <div className="text-red-400 flex items-center gap-1">
+            <X size={14} /> Traditional Job Boards
           </div>
-          <h3 className="font-display text-lg font-bold mb-2" style={{ color: 'var(--text-1)' }}>
-            Calm, not chaotic
-          </h3>
-          <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-4)' }}>
-            A rejection already feels bad. The interface shouldn't make it worse. We call a closed
-            application what it is — not "Rejected" in harsh red.
-          </p>
-          <StatusBadge status="Not Selected" />
+          <div className="text-purple-300 flex items-center gap-1 font-bold">
+            <Check size={14} className="text-emerald-400" /> CareerCompass
+          </div>
         </div>
 
-        {/* Card 2 */}
-        <div className="rounded-2xl p-8 border relative overflow-hidden"
-          style={{ background: 'var(--bg-card)', borderColor: 'var(--border-1)' }}>
-          <div aria-hidden="true" style={{
-            position: 'absolute', top: '-40px', right: '-40px',
-            width: '180px', height: '180px', borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)',
-          }} />
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-            style={{ background: 'rgba(124,58,237,0.12)', color: '#7c3aed' }}>
-            <Zap size={18} />
-          </div>
-          <h3 className="font-display text-lg font-bold mb-2" style={{ color: 'var(--text-1)' }}>
-            Free to start — not metered
-          </h3>
-          <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-4)' }}>
-            Job discovery, application tracking, and interview prep don't need a monthly cap.
-            They're core features — free with no tier to unlock.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {['AI Resume Match', 'Application Tracker', 'Mock Interview', 'CV Center'].map(f => (
-              <span key={f} className="text-xs px-3 py-1 rounded-full font-medium border"
-                style={{ background: 'rgba(124,58,237,0.08)', borderColor: 'rgba(124,58,237,0.2)', color: '#a78bfa' }}>
-                ✓ {f}
-              </span>
-            ))}
-          </div>
+        <div className="divide-y" style={{ borderColor: 'var(--border-3)' }}>
+          {comparisons.map((row, i) => (
+            <div key={i} className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 text-xs items-center transition-colors hover:bg-white/5 px-2 rounded-xl">
+              <div className="font-bold text-sm" style={{ color: 'var(--text-1)' }}>
+                {row.feature}
+              </div>
+              <div className="flex items-start gap-2" style={{ color: 'var(--text-5)' }}>
+                <span className="w-4 h-4 rounded-full bg-red-500/15 text-red-400 flex items-center justify-center shrink-0 mt-0.5">✕</span>
+                <span>{row.old}</span>
+              </div>
+              <div className="flex items-start gap-2 font-semibold" style={{ color: '#34d399' }}>
+                <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">✓</span>
+                <span>{row.new}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
